@@ -1,70 +1,30 @@
 import { useParams, Link } from "wouter";
-import { useEffect, useState } from "react";
-import { type ApiProduct } from "@/hooks/use-products";
-import { products as staticProducts } from "@/lib/data";
+import { getProductById } from "@/lib/data";
 import { formatCurrency } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/store/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Check, Coffee, Droplets, Leaf } from "lucide-react";
+import { useState } from "react";
 import NotFound from "./not-found";
 
 export default function Product() {
   const { id } = useParams();
+  const product = getProductById(id || "");
   const addItem = useCartStore((state) => state.addItem);
   const { toast } = useToast();
 
-  const [product, setProduct] = useState<ApiProduct | null | undefined>(undefined);
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/products")
-      .then((r) => r.json())
-      .then((data: ApiProduct[]) => {
-        const found = data.find((p) => p.id === id);
-        setProduct(found || null);
-      })
-      .catch(() => {
-        const fallback = staticProducts.find((p) => p.id === id);
-        setProduct(fallback
-          ? { ...fallback, roastLevel: fallback.roastLevel ?? null, origin: fallback.origin ?? null, available: true, availableUntil: null, createdAt: new Date().toISOString() }
-          : null
-        );
-      });
-  }, [id]);
-
-  if (product === undefined) {
-    return (
-      <div className="container max-w-6xl mx-auto px-6 py-32 flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (product === null) return <NotFound />;
+  if (!product) return <NotFound />;
 
   const handleAddToCart = () => {
     setIsAdding(true);
     setTimeout(() => {
-      addItem(
-        {
-          id: product.id,
-          name: product.name,
-          description: product.description,
-          price: product.price,
-          image: product.image,
-          category: product.category as any,
-          tastingNotes: product.tastingNotes,
-          ingredients: product.ingredients,
-          preparation: product.preparation,
-          roastLevel: product.roastLevel as any,
-          origin: product.origin as any,
-        },
-        quantity,
-      );
+      addItem(product, quantity);
       setIsAdding(false);
       setJustAdded(true);
       toast({
@@ -84,7 +44,11 @@ export default function Product() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
         <div className="animate-in fade-in slide-in-from-left-8 duration-700">
           <div className="aspect-[4/5] rounded-3xl overflow-hidden shadow-lg border border-border/50 relative bg-muted">
-            <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+            <img
+              src={product.image}
+              alt={product.name}
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
 
@@ -107,7 +71,10 @@ export default function Product() {
 
           <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">{product.name}</h1>
           <p className="text-2xl font-light mb-8">{formatCurrency(product.price)}</p>
-          <p className="text-lg text-foreground/80 leading-relaxed mb-8">{product.description}</p>
+
+          <p className="text-lg text-foreground/80 leading-relaxed mb-8">
+            {product.description}
+          </p>
 
           <div className="mb-10 p-6 bg-secondary rounded-2xl">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground/60 mb-4 flex items-center">
@@ -124,17 +91,32 @@ export default function Product() {
 
           <div className="flex items-end gap-4 mb-12 pb-12 border-b border-border">
             <div className="w-24">
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Adet</label>
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">
+                Adet
+              </label>
               <div className="flex items-center border border-input rounded-full h-14 bg-background">
-                <button className="px-4 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50" onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={quantity <= 1}>-</button>
+                <button
+                  className="px-4 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  disabled={quantity <= 1}
+                >
+                  -
+                </button>
                 <span className="flex-1 text-center font-medium">{quantity}</span>
-                <button className="px-4 text-muted-foreground hover:text-foreground transition-colors" onClick={() => setQuantity(quantity + 1)}>+</button>
+                <button
+                  className="px-4 text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setQuantity(quantity + 1)}
+                >
+                  +
+                </button>
               </div>
             </div>
 
             <Button
               size="lg"
-              className={`flex-1 h-14 rounded-full text-base relative overflow-hidden transition-all duration-300 ${justAdded ? "bg-green-600 hover:bg-green-700 text-white" : ""}`}
+              className={`flex-1 h-14 rounded-full text-base relative overflow-hidden transition-all duration-300 ${
+                justAdded ? "bg-green-600 hover:bg-green-700 text-white" : ""
+              }`}
               onClick={handleAddToCart}
               disabled={isAdding}
             >
@@ -154,14 +136,18 @@ export default function Product() {
                 <Coffee className="h-4 w-4 mr-2" /> İçindekiler
               </h3>
               <ul className="list-disc pl-5 text-foreground/80 space-y-1">
-                {product.ingredients.map((ing) => <li key={ing}>{ing}</li>)}
+                {product.ingredients.map((ing) => (
+                  <li key={ing}>{ing}</li>
+                ))}
               </ul>
             </div>
             <div>
               <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground/60 mb-3 flex items-center">
                 <Droplets className="h-4 w-4 mr-2" /> Hazırlanışı
               </h3>
-              <p className="text-foreground/80 leading-relaxed">{product.preparation}</p>
+              <p className="text-foreground/80 leading-relaxed">
+                {product.preparation}
+              </p>
             </div>
           </div>
         </div>
