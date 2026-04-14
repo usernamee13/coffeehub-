@@ -3,6 +3,7 @@ import { useCartStore } from "@/store/use-cart";
 import { ShoppingBag, Menu as MenuIcon, Coffee, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "./theme-toggle";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -71,7 +72,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </Link>
           </nav>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
             <Link
               href="/cart"
               className="relative p-2 -m-2 text-foreground/80 hover:text-primary transition-colors flex items-center gap-1 group"
