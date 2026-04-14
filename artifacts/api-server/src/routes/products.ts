@@ -15,16 +15,16 @@ const ROAST_LEVELS = ["Açık", "Orta", "Orta-Koyu", "Koyu"] as const;
 
 const productSchema = z.object({
   id: z.string().min(1).regex(/^[a-z0-9-]+$/, "Sadece küçük harf, rakam ve tire kullanın"),
-  name: z.string().min(1),
-  description: z.string().min(1),
-  price: z.number().int().positive(),
+  name: z.string().default("Yeni Ürün"),
+  description: z.string().default(""),
+  price: z.number().int().positive().default(100),
   image: z.string().default("https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=800&auto=format&fit=crop"),
-  category: z.enum(CATEGORIES),
+  category: z.enum(CATEGORIES).default("Sıcak Kahveler"),
   roastLevel: z.enum(ROAST_LEVELS).optional(),
   origin: z.string().optional(),
-  tastingNotes: z.array(z.string()).min(1),
-  ingredients: z.array(z.string()).min(1),
-  preparation: z.string().min(1),
+  tastingNotes: z.array(z.string()).default([]),
+  ingredients: z.array(z.string()).default([]),
+  preparation: z.string().default(""),
 });
 
 const updateProductSchema = productSchema.partial().omit({ id: true });
