@@ -1,7 +1,9 @@
 import { Link } from "wouter";
 import { products } from "@/lib/data";
+import { formatCurrency } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ChevronRight } from "lucide-react";
+import turkishMenuImage from "@assets/WhatsApp_Image_2026-04-14_at_16.46.09_1776184216155.jpeg";
 
 export default function Home() {
   const featured = products.slice(0, 3);
@@ -14,7 +16,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent z-10" />
           <img
             src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=2000&auto=format&fit=crop"
-            alt="Coffee shop interior"
+            alt="Sıcak atmosferli kahve dükkânı"
             className="w-full h-full object-cover object-center mix-blend-overlay opacity-60"
           />
         </div>
@@ -22,16 +24,16 @@ export default function Home() {
         <div className="container max-w-6xl mx-auto px-6 relative z-10">
           <div className="max-w-2xl animate-in slide-in-from-bottom-8 fade-in duration-1000 fill-mode-both">
             <h1 className="font-serif text-5xl md:text-7xl font-bold leading-tight text-foreground mb-6">
-              Warmth in every <br />
-              <span className="text-primary italic font-normal">single drop.</span>
+              Her fincanda <br />
+              <span className="text-primary italic font-normal">sıcacık bir mola.</span>
             </h1>
             <p className="text-lg md:text-xl text-foreground/80 mb-10 max-w-lg font-light leading-relaxed">
-              Step into our virtual neighborhood café. We source, roast, and brew coffees that tell a story—crafted for those who savor the moment.
+              Mahallenizdeki sevdiğiniz kahveci hissini çevrimiçi deneyime taşıyoruz. Özenle seçilen çekirdekler, doğru kavrum ve keyifle hazırlanmış fincanlar sizi bekliyor.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link href="/menu">
                 <Button size="lg" className="h-14 px-8 text-base rounded-full shadow-lg hover:shadow-xl transition-all">
-                  Browse the Menu
+                  Menüyü Keşfet
                 </Button>
               </Link>
             </div>
@@ -43,11 +45,11 @@ export default function Home() {
       <section className="container max-w-6xl mx-auto px-6">
         <div className="flex items-end justify-between mb-12">
           <div>
-            <h2 className="font-serif text-3xl font-bold mb-2">Curated for You</h2>
-            <p className="text-muted-foreground">Our most beloved roasts this season.</p>
+            <h2 className="font-serif text-3xl font-bold mb-2">Sizin İçin Seçtiklerimiz</h2>
+            <p className="text-muted-foreground">Bu sezon en çok sevilen kahvelerimiz.</p>
           </div>
           <Link href="/menu" className="hidden md:flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors">
-            View all coffees <ArrowRight className="ml-1 h-4 w-4" />
+            Tüm kahveleri gör <ArrowRight className="ml-1 h-4 w-4" />
           </Link>
         </div>
 
@@ -66,7 +68,7 @@ export default function Home() {
                   />
                   <div className="absolute top-4 left-4">
                     <span className="bg-background/90 backdrop-blur-sm text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm">
-                      {product.roastLevel}
+                      {product.roastLevel} Kavrum
                     </span>
                   </div>
                 </div>
@@ -75,13 +77,13 @@ export default function Home() {
                     <h3 className="font-serif text-xl font-semibold group-hover:text-primary transition-colors">
                       {product.name}
                     </h3>
-                    <span className="font-medium">${product.price.toFixed(2)}</span>
+                    <span className="font-medium">{formatCurrency(product.price)}</span>
                   </div>
                   <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-grow">
                     {product.description}
                   </p>
                   <div className="flex items-center text-sm font-medium text-primary mt-auto">
-                    View Details <ChevronRight className="h-4 w-4 ml-1 transition-transform group-hover:translate-x-1" />
+                    Detayları Gör <ChevronRight className="h-4 w-4 ml-1 transition-transform group-hover:translate-x-1" />
                   </div>
                 </div>
               </div>
@@ -92,7 +94,7 @@ export default function Home() {
         <div className="mt-8 text-center md:hidden">
           <Link href="/menu">
             <Button variant="outline" className="w-full h-12 rounded-full">
-              View all coffees
+              Tüm kahveleri gör
             </Button>
           </Link>
         </div>
@@ -102,19 +104,19 @@ export default function Home() {
       <section className="container max-w-6xl mx-auto px-6">
         <div className="bg-primary/5 rounded-3xl p-8 md:p-16 flex flex-col md:flex-row items-center gap-12">
           <div className="md:w-1/2">
-            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-6">Roasted with intention.</h2>
+            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-6">Özenle kavrulur, keyifle hazırlanır.</h2>
             <p className="text-foreground/80 mb-6 leading-relaxed">
-              Every bean that makes it into an Ember & Bean bag has been meticulously chosen. We work directly with small farms globally, ensuring fair compensation and sustainable practices.
+              Ember & Bean paketlerine giren her çekirdek, lezzeti ve izlenebilirliği düşünülerek seçilir. Küçük üreticilerle kurulan sürdürülebilir ilişkiler sayesinde fincanınıza güvenilir ve karakterli kahveler ulaşır.
             </p>
             <p className="text-foreground/80 leading-relaxed">
-              Our small-batch roasting process highlights the unique characteristics of each origin, bringing you a cup that is complex, comforting, and unforgettable.
+              Küçük partiler hâlinde kavurduğumuz kahveler, her bölgenin kendine özgü aromasını korur. Sonuç: dengeli, sıcak ve akılda kalan bir kahve deneyimi.
             </p>
           </div>
           <div className="md:w-1/2 w-full">
             <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-lg">
               <img 
-                src="https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?q=80&w=1000&auto=format&fit=crop" 
-                alt="Roasting coffee beans" 
+                src={turkishMenuImage} 
+                alt="Türkçe kahve menüsü ilham görseli" 
                 className="w-full h-full object-cover"
               />
             </div>

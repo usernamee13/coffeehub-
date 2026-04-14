@@ -19,7 +19,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location]);
@@ -50,7 +49,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 location === "/" ? "text-primary" : "text-foreground/80"
               )}
             >
-              Home
+              Ana Sayfa
             </Link>
             <Link
               href="/menu"
@@ -59,7 +58,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 location === "/menu" ? "text-primary" : "text-foreground/80"
               )}
             >
-              Menu
+              Menü
             </Link>
             <Link
               href="/order-history"
@@ -68,7 +67,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 location === "/order-history" ? "text-primary" : "text-foreground/80"
               )}
             >
-              Orders
+              Siparişlerim
             </Link>
           </nav>
 
@@ -88,6 +87,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <button
               className="md:hidden p-2 -m-2 text-foreground/80 hover:text-primary"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Mobil menüyü aç veya kapat"
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <MenuIcon className="h-5 w-5" />}
             </button>
@@ -95,7 +95,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-40 bg-background/95 backdrop-blur-sm md:hidden pt-24 px-6 animate-in fade-in slide-in-from-top-4 duration-300">
           <nav className="flex flex-col gap-6 text-2xl font-serif">
@@ -106,7 +105,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 location === "/" ? "text-primary" : "text-foreground"
               )}
             >
-              Home
+              Ana Sayfa
             </Link>
             <Link
               href="/menu"
@@ -115,7 +114,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 location === "/menu" ? "text-primary" : "text-foreground"
               )}
             >
-              Menu
+              Menü
             </Link>
             <Link
               href="/order-history"
@@ -124,7 +123,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 location === "/order-history" ? "text-primary" : "text-foreground"
               )}
             >
-              Orders
+              Siparişlerim
             </Link>
           </nav>
         </div>
@@ -140,27 +139,27 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <span className="font-serif font-bold text-lg">Ember & Bean</span>
             </div>
             <p className="text-muted-foreground text-sm max-w-xs">
-              A warm neighborhood café experience online. Every drink has a story, roasted with care.
+              Mahalle kahvecisi sıcaklığını çevrimiçi deneyime taşıyan özenli kahveler. Her fincanın kendine ait bir hikâyesi var.
             </p>
           </div>
           <div>
-            <h3 className="font-medium mb-4">Visit Us</h3>
+            <h3 className="font-medium mb-4">Bizi Ziyaret Edin</h3>
             <address className="not-italic text-sm text-muted-foreground flex flex-col gap-1">
-              <span>123 Roaster's Ave</span>
-              <span>Coffee District</span>
-              <span>Portland, OR 97204</span>
+              <span>Kavurmacılar Sokak No: 12</span>
+              <span>Moda, Kadıköy</span>
+              <span>İstanbul</span>
             </address>
           </div>
           <div>
-            <h3 className="font-medium mb-4">Hours</h3>
+            <h3 className="font-medium mb-4">Çalışma Saatleri</h3>
             <div className="text-sm text-muted-foreground flex flex-col gap-1">
               <p className="flex justify-between max-w-[200px]">
-                <span>Mon-Fri</span>
-                <span>7am - 6pm</span>
+                <span>Hafta içi</span>
+                <span>07.00 - 18.00</span>
               </p>
               <p className="flex justify-between max-w-[200px]">
-                <span>Sat-Sun</span>
-                <span>8am - 5pm</span>
+                <span>Hafta sonu</span>
+                <span>08.00 - 17.00</span>
               </p>
             </div>
           </div>

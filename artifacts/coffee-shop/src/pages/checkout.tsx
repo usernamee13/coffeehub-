@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, Link } from "wouter";
 import { useCartStore } from "@/store/use-cart";
+import { formatCurrency } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,7 +25,7 @@ export default function Checkout() {
     }
   }, [items.length, setLocation, step]);
 
-  const shipping = deliveryMethod === "shipping" ? 5.00 : 0;
+  const shipping = deliveryMethod === "shipping" ? 45 : 0;
   const finalTotal = total + shipping;
 
   const handleNextStep = (e: React.FormEvent) => {
@@ -46,8 +47,8 @@ export default function Checkout() {
       setIsSubmitting(false);
       clearCart();
       toast({
-        title: "Order placed successfully!",
-        description: "We'll send you an email with your receipt.",
+        title: "Siparişiniz alındı!",
+        description: "Fişinizi ve sipariş durumunu e-posta ile paylaşacağız.",
       });
       setLocation("/order-history");
     }, 1500);
@@ -67,47 +68,47 @@ export default function Checkout() {
           <div className="flex items-center mb-12">
             <div className={`flex items-center ${step >= 1 ? 'text-primary' : 'text-muted-foreground'}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm border-2 ${step >= 1 ? 'border-primary bg-primary/10' : 'border-muted-foreground/30'}`}>1</div>
-              <span className="ml-3 font-medium hidden sm:inline">Details</span>
+              <span className="ml-3 font-medium hidden sm:inline">Bilgiler</span>
             </div>
             <div className={`flex-1 h-px mx-4 ${step >= 2 ? 'bg-primary' : 'bg-border'}`} />
             <div className={`flex items-center ${step >= 2 ? 'text-primary' : 'text-muted-foreground'}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm border-2 ${step >= 2 ? 'border-primary bg-primary/10' : 'border-muted-foreground/30'}`}>2</div>
-              <span className="ml-3 font-medium hidden sm:inline">Delivery</span>
+              <span className="ml-3 font-medium hidden sm:inline">Teslimat</span>
             </div>
             <div className={`flex-1 h-px mx-4 ${step >= 3 ? 'bg-primary' : 'bg-border'}`} />
             <div className={`flex items-center ${step >= 3 ? 'text-primary' : 'text-muted-foreground'}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm border-2 ${step >= 3 ? 'border-primary bg-primary/10' : 'border-muted-foreground/30'}`}>3</div>
-              <span className="ml-3 font-medium hidden sm:inline">Payment</span>
+              <span className="ml-3 font-medium hidden sm:inline">Ödeme</span>
             </div>
           </div>
 
           <div className="bg-card rounded-3xl p-6 sm:p-10 border border-border shadow-sm">
             {step === 1 && (
               <form onSubmit={handleNextStep} className="animate-in fade-in slide-in-from-right-4">
-                <h2 className="font-serif text-2xl font-bold mb-6">Contact Information</h2>
+                <h2 className="font-serif text-2xl font-bold mb-6">İletişim Bilgileri</h2>
                 <div className="space-y-5">
                   <div className="grid grid-cols-2 gap-5">
                     <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name</Label>
+                      <Label htmlFor="firstName">Ad</Label>
                       <Input id="firstName" required className="h-12 rounded-xl" />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name</Label>
+                      <Label htmlFor="lastName">Soyad</Label>
                       <Input id="lastName" required className="h-12 rounded-xl" />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
+                    <Label htmlFor="email">E-posta Adresi</Label>
                     <Input id="email" type="email" required className="h-12 rounded-xl" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number (Optional)</Label>
+                    <Label htmlFor="phone">Telefon Numarası (İsteğe Bağlı)</Label>
                     <Input id="phone" type="tel" className="h-12 rounded-xl" />
                   </div>
                 </div>
                 <div className="mt-10">
                   <Button type="submit" size="lg" className="w-full h-14 rounded-full text-base">
-                    Continue to Delivery
+                    Teslimat Bilgilerine Geç
                   </Button>
                 </div>
               </form>
@@ -115,7 +116,7 @@ export default function Checkout() {
 
             {step === 2 && (
               <form onSubmit={handleNextStep} className="animate-in fade-in slide-in-from-right-4">
-                <h2 className="font-serif text-2xl font-bold mb-6">Delivery Method</h2>
+                <h2 className="font-serif text-2xl font-bold mb-6">Teslimat Yöntemi</h2>
                 
                 <RadioGroup 
                   defaultValue={deliveryMethod} 
@@ -133,11 +134,11 @@ export default function Checkout() {
                           <Truck className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <p className="font-medium text-base">Ship to Address</p>
-                          <p className="text-sm text-muted-foreground">3-5 business days</p>
+                          <p className="font-medium text-base">Adrese Teslim</p>
+                          <p className="text-sm text-muted-foreground">1-3 iş günü içinde teslim</p>
                         </div>
                       </div>
-                      <span className="font-medium">$5.00</span>
+                      <span className="font-medium">{formatCurrency(shipping)}</span>
                     </Label>
                   </div>
                   <div>
@@ -151,35 +152,35 @@ export default function Checkout() {
                           <Store className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <p className="font-medium text-base">In-Store Pickup</p>
-                          <p className="text-sm text-muted-foreground">Ready in 2 hours</p>
+                          <p className="font-medium text-base">Mağazadan Teslim</p>
+                          <p className="text-sm text-muted-foreground">Yaklaşık 2 saat içinde hazır</p>
                         </div>
                       </div>
-                      <span className="font-medium">Free</span>
+                      <span className="font-medium">Ücretsiz</span>
                     </Label>
                   </div>
                 </RadioGroup>
 
                 {deliveryMethod === "shipping" && (
                   <div className="space-y-5 animate-in fade-in zoom-in-95">
-                    <h3 className="font-medium mb-2">Shipping Address</h3>
+                    <h3 className="font-medium mb-2">Teslimat Adresi</h3>
                     <div className="space-y-2">
-                      <Label htmlFor="address">Street Address</Label>
+                      <Label htmlFor="address">Adres</Label>
                       <Input id="address" required className="h-12 rounded-xl" />
                     </div>
                     <div className="grid grid-cols-2 gap-5">
                       <div className="space-y-2">
-                        <Label htmlFor="city">City</Label>
+                        <Label htmlFor="city">İlçe / Şehir</Label>
                         <Input id="city" required className="h-12 rounded-xl" />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="state">State / Province</Label>
+                        <Label htmlFor="state">İl</Label>
                         <Input id="state" required className="h-12 rounded-xl" />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-5">
                       <div className="space-y-2">
-                        <Label htmlFor="zip">ZIP / Postal Code</Label>
+                        <Label htmlFor="zip">Posta Kodu</Label>
                         <Input id="zip" required className="h-12 rounded-xl" />
                       </div>
                     </div>
@@ -188,10 +189,10 @@ export default function Checkout() {
 
                 <div className="mt-10 flex gap-4">
                   <Button type="button" variant="outline" size="lg" onClick={() => setStep(1)} className="h-14 rounded-full px-8">
-                    Back
+                    Geri
                   </Button>
                   <Button type="submit" size="lg" className="flex-1 h-14 rounded-full text-base">
-                    Continue to Payment
+                    Ödeme Adımına Geç
                   </Button>
                 </div>
               </form>
@@ -199,7 +200,7 @@ export default function Checkout() {
 
             {step === 3 && (
               <form onSubmit={handlePlaceOrder} className="animate-in fade-in slide-in-from-right-4">
-                <h2 className="font-serif text-2xl font-bold mb-6">Payment</h2>
+                <h2 className="font-serif text-2xl font-bold mb-6">Ödeme</h2>
                 
                 <RadioGroup 
                   value={paymentMethod}
@@ -207,9 +208,9 @@ export default function Checkout() {
                   className="grid gap-4 mb-8"
                 >
                   {[
-                    ["credit-card", "Credit Card", "Demo mode - enter any card details"],
-                    ["digital-wallet", "Digital Wallet", "Apple Pay, Google Pay, or Shop Pay"],
-                    ["gift-card", "Gift Card", "Use an Ember & Bean gift balance"],
+                    ["credit-card", "Kredi/Banka Kartı", "Demo modunda herhangi bir kart bilgisi girebilirsiniz"],
+                    ["digital-wallet", "Dijital Cüzdan", "Apple Pay, Google Pay veya Shop Pay ile ödeyin"],
+                    ["gift-card", "Hediye Kartı", "Ember & Bean hediye kartı bakiyenizi kullanın"],
                   ].map(([value, title, description]) => (
                     <div key={value}>
                       <RadioGroupItem value={value} id={value} className="peer sr-only" />
@@ -232,20 +233,20 @@ export default function Checkout() {
                 {paymentMethod === "credit-card" && (
                   <div className="space-y-5 animate-in fade-in zoom-in-95">
                     <div className="space-y-2">
-                      <Label htmlFor="cc-name">Name on Card</Label>
-                      <Input id="cc-name" required className="h-12 rounded-xl" placeholder="Jane Doe" />
+                      <Label htmlFor="cc-name">Kart Üzerindeki İsim</Label>
+                      <Input id="cc-name" required className="h-12 rounded-xl" placeholder="Ayşe Yılmaz" />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="cc-num">Card Number</Label>
+                      <Label htmlFor="cc-num">Kart Numarası</Label>
                       <Input id="cc-num" required className="h-12 rounded-xl font-mono" placeholder="0000 0000 0000 0000" maxLength={19} />
                     </div>
                     <div className="grid grid-cols-2 gap-5">
                       <div className="space-y-2">
-                        <Label htmlFor="cc-exp">Expiry Date</Label>
+                        <Label htmlFor="cc-exp">Son Kullanma Tarihi</Label>
                         <Input id="cc-exp" required className="h-12 rounded-xl" placeholder="MM/YY" maxLength={5} />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="cc-cvc">CVC</Label>
+                        <Label htmlFor="cc-cvc">Güvenlik Kodu</Label>
                         <Input id="cc-cvc" required className="h-12 rounded-xl" placeholder="123" maxLength={4} />
                       </div>
                     </div>
@@ -254,16 +255,16 @@ export default function Checkout() {
 
                 {paymentMethod !== "credit-card" && (
                   <div className="rounded-2xl bg-secondary p-5 text-sm text-muted-foreground animate-in fade-in zoom-in-95">
-                    This demo checkout will reserve your order now and complete payment using your selected option at pickup or delivery confirmation.
+                    Bu demo ödeme akışında siparişiniz şimdi ayrılır; ödeme, seçtiğiniz yöntemle teslimat veya mağaza onayı sırasında tamamlanmış kabul edilir.
                   </div>
                 )}
 
                 <div className="mt-10 flex gap-4">
                   <Button type="button" variant="outline" size="lg" onClick={() => setStep(2)} className="h-14 rounded-full px-8 disabled:opacity-50" disabled={isSubmitting}>
-                    Back
+                    Geri
                   </Button>
                   <Button type="submit" size="lg" className="flex-1 h-14 rounded-full text-base" disabled={isSubmitting}>
-                    {isSubmitting ? "Processing..." : `Pay $${finalTotal.toFixed(2)}`}
+                    {isSubmitting ? "İşleniyor..." : `${formatCurrency(finalTotal)} Öde`}
                   </Button>
                 </div>
               </form>
@@ -274,7 +275,7 @@ export default function Checkout() {
         {/* Order Summary Sidebar */}
         <div className="lg:col-span-5">
           <div className="bg-secondary rounded-3xl p-8 sticky top-32">
-            <h2 className="font-serif text-xl font-semibold mb-6">Order Summary</h2>
+            <h2 className="font-serif text-xl font-semibold mb-6">Sipariş Özeti</h2>
             
             <div className="space-y-4 mb-6 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
               {items.map((item) => (
@@ -284,10 +285,10 @@ export default function Checkout() {
                   </div>
                   <div className="flex-1 text-sm">
                     <p className="font-medium leading-tight mb-1">{item.product.name}</p>
-                    <p className="text-muted-foreground">Qty: {item.quantity}</p>
+                    <p className="text-muted-foreground">Adet: {item.quantity}</p>
                   </div>
                   <div className="text-sm font-medium">
-                    ${(item.product.price * item.quantity).toFixed(2)}
+                    {formatCurrency(item.product.price * item.quantity)}
                   </div>
                 </div>
               ))}
@@ -295,19 +296,19 @@ export default function Checkout() {
             
             <div className="space-y-3 pt-6 border-t border-border/50 text-sm">
               <div className="flex justify-between text-foreground/80">
-                <span>Subtotal</span>
-                <span>${total.toFixed(2)}</span>
+                <span>Ara Toplam</span>
+                <span>{formatCurrency(total)}</span>
               </div>
               <div className="flex justify-between text-foreground/80">
-                <span>Shipping</span>
-                <span>{step >= 2 ? (shipping > 0 ? `$${shipping.toFixed(2)}` : 'Free') : 'Calculated next step'}</span>
+                <span>Teslimat</span>
+                <span>{step >= 2 ? (shipping > 0 ? formatCurrency(shipping) : "Ücretsiz") : "Sonraki adımda hesaplanır"}</span>
               </div>
             </div>
             
             <div className="flex justify-between items-center mt-6 pt-6 border-t border-border">
-              <span className="font-semibold">Total</span>
+              <span className="font-semibold">Toplam</span>
               <span className="font-serif font-bold text-2xl">
-                ${(step >= 2 ? finalTotal : total).toFixed(2)}
+                {formatCurrency(step >= 2 ? finalTotal : total)}
               </span>
             </div>
           </div>

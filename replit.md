@@ -4,7 +4,7 @@
 
 pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
 
-The primary user-facing artifact is **Coffee Shop**, a React/Vite website for Ember & Bean. It provides a warm, modern coffee shop shopping experience with a homepage, coffee menu, product details, cart management, multi-step checkout, multiple demo payment options, and local demo order history.
+The primary user-facing artifact is **Coffee Shop**, a React/Vite website for Ember & Bean. It provides a warm, modern Turkish coffee shop shopping experience with a Turkish homepage, coffee menu, product details, cart management, multi-step checkout, multiple demo payment options, and local demo order history.
 
 ## Stack
 
@@ -38,3 +38,10 @@ The primary user-facing artifact is **Coffee Shop**, a React/Vite website for Em
 - `artifacts/mockup-sandbox` — design/mockup canvas sandbox served at `/__mockup`
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
+
+## Coffee Shop Notes
+
+- All user-facing Coffee Shop UI copy is localized in Turkish.
+- Product names, descriptions, tasting notes, ingredients, preparation instructions, roast levels, checkout labels, order history, and footer content use Turkish copy.
+- Coffee prices and checkout totals are formatted in Turkish Lira through `artifacts/coffee-shop/src/lib/format.ts`.
+- Cart and demo orders persist in localStorage under `ember-bean-tr-cart`.

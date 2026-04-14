@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import type { Product } from "@/lib/data";
+import { products, type Product } from "@/lib/data";
 
 export interface CartItem {
   product: Product;
@@ -9,7 +9,7 @@ export interface CartItem {
 export interface Order {
   id: string;
   date: string;
-  status: "Processing" | "Delivered";
+  status: "Hazırlanıyor" | "Teslim Edildi";
   total: number;
   shipping: number;
   deliveryMethod: string;
@@ -41,11 +41,17 @@ type PersistedState = {
   orders: Order[];
 };
 
-const storageKey = "ember-bean-cart";
+const storageKey = "ember-bean-tr-cart";
 const listeners = new Set<() => void>();
 
 const calculateTotal = (items: CartItem[]) =>
   items.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
+
+const localizeItems = (items: CartItem[]) =>
+  items.map((item) => ({
+    ...item,
+    product: products.find((product) => product.id === item.product.id) ?? item.product,
+  }));
 
 const loadState = (): PersistedState => {
   if (typeof window === "undefined") {
@@ -59,7 +65,7 @@ const loadState = (): PersistedState => {
     }
     const parsed = JSON.parse(raw) as Partial<PersistedState>;
     return {
-      items: Array.isArray(parsed.items) ? parsed.items : [],
+      items: Array.isArray(parsed.items) ? localizeItems(parsed.items) : [],
       orders: Array.isArray(parsed.orders) ? parsed.orders : [],
     };
   } catch {
@@ -139,8 +145,8 @@ function createOrder(details: {
 
   const order: Order = {
     id: `ORD-${Math.floor(1000 + Math.random() * 9000)}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
-    date: "Today",
-    status: "Processing",
+    date: "Bugün",
+    status: "Hazırlanıyor",
     total: calculateTotal(state.items) + details.shipping,
     shipping: details.shipping,
     deliveryMethod: details.deliveryMethod,

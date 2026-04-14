@@ -1,14 +1,15 @@
 import { Link } from "wouter";
 import { products } from "@/lib/data";
+import { formatCurrency } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 
 export default function Menu() {
   return (
     <div className="container max-w-6xl mx-auto px-6 py-12">
       <div className="max-w-2xl mb-16 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">Our Menu</h1>
+        <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">Kahve Menümüz</h1>
         <p className="text-lg text-muted-foreground leading-relaxed">
-          Explore our collection of single-origin beans and signature blends. Each offering is roasted to order and crafted to bring comfort to your cup.
+          Tek köken çekirdeklerden imza harmanlara kadar özenle seçilmiş kahvelerimizi keşfedin. Her seçenek, fincanınızda net aroma ve keyifli bir içim sunmak için hazırlanır.
         </p>
       </div>
 
@@ -31,12 +32,12 @@ export default function Menu() {
                   <h3 className="font-serif text-xl font-semibold group-hover:text-primary transition-colors">
                     {product.name}
                   </h3>
-                  <span className="font-medium">${product.price.toFixed(2)}</span>
+                  <span className="font-medium">{formatCurrency(product.price)}</span>
                 </div>
                 
                 <div className="flex flex-wrap gap-2 mb-4">
                   <Badge variant="secondary" className="font-normal bg-secondary hover:bg-secondary text-secondary-foreground">
-                    {product.roastLevel}
+                    {product.roastLevel} Kavrum
                   </Badge>
                   <Badge variant="outline" className="font-normal text-muted-foreground border-border">
                     {product.origin.split(',')[0]}
@@ -48,9 +49,9 @@ export default function Menu() {
                 </p>
                 
                 <div className="mt-auto">
-                  <p className="text-xs font-medium text-foreground/60 uppercase tracking-wider mb-2">Tasting Notes</p>
+                  <p className="text-xs font-medium text-foreground/60 uppercase tracking-wider mb-2">Tat Notaları</p>
                   <p className="text-sm text-foreground/80 italic">
-                    {product.tastingNotes.join(' • ')}
+                    {product.tastingNotes.join(" • ")}
                   </p>
                 </div>
               </div>

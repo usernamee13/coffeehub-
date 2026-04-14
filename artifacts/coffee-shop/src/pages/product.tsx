@@ -1,5 +1,6 @@
 import { useParams, Link } from "wouter";
 import { getProductById } from "@/lib/data";
+import { formatCurrency } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/store/use-cart";
@@ -27,8 +28,8 @@ export default function Product() {
       setIsAdding(false);
       setJustAdded(true);
       toast({
-        title: "Added to cart",
-        description: `${quantity}x ${product.name} added to your bag.`,
+        title: "Sepete eklendi",
+        description: `${quantity} adet ${product.name} sepetinize eklendi.`,
       });
       setTimeout(() => setJustAdded(false), 2000);
     }, 400);
@@ -37,7 +38,7 @@ export default function Product() {
   return (
     <div className="container max-w-6xl mx-auto px-6 py-12">
       <Link href="/menu" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-8 transition-colors">
-        <ArrowLeft className="h-4 w-4 mr-2" /> Back to Menu
+        <ArrowLeft className="h-4 w-4 mr-2" /> Menüye Dön
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
@@ -56,7 +57,7 @@ export default function Product() {
         <div className="flex flex-col animate-in fade-in slide-in-from-right-8 duration-700">
           <div className="flex flex-wrap gap-2 mb-4">
             <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 border-transparent rounded-full px-3">
-              {product.roastLevel} Roast
+              {product.roastLevel} Kavrum
             </Badge>
             <Badge variant="outline" className="rounded-full px-3 text-muted-foreground border-border">
               {product.origin}
@@ -64,7 +65,7 @@ export default function Product() {
           </div>
 
           <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">{product.name}</h1>
-          <p className="text-2xl font-light mb-8">${product.price.toFixed(2)}</p>
+          <p className="text-2xl font-light mb-8">{formatCurrency(product.price)}</p>
 
           <p className="text-lg text-foreground/80 leading-relaxed mb-8">
             {product.description}
@@ -73,7 +74,7 @@ export default function Product() {
           {/* Tasting Notes */}
           <div className="mb-10 p-6 bg-secondary rounded-2xl">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground/60 mb-4 flex items-center">
-              <Leaf className="h-4 w-4 mr-2" /> Tasting Notes
+              <Leaf className="h-4 w-4 mr-2" /> Tat Notaları
             </h3>
             <div className="flex flex-wrap gap-3">
               {product.tastingNotes.map((note) => (
@@ -88,7 +89,7 @@ export default function Product() {
           <div className="flex items-end gap-4 mb-12 pb-12 border-b border-border">
             <div className="w-24">
               <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">
-                Quantity
+                Adet
               </label>
               <div className="flex items-center border border-input rounded-full h-14 bg-background">
                 <button 
@@ -117,11 +118,11 @@ export default function Product() {
               disabled={isAdding}
             >
               {isAdding ? (
-                <span className="flex items-center justify-center animate-pulse">Adding...</span>
+                <span className="flex items-center justify-center animate-pulse">Ekleniyor...</span>
               ) : justAdded ? (
-                <span className="flex items-center justify-center"><Check className="mr-2 h-5 w-5" /> Added</span>
+                <span className="flex items-center justify-center"><Check className="mr-2 h-5 w-5" /> Eklendi</span>
               ) : (
-                <span>Add to Bag — ${(product.price * quantity).toFixed(2)}</span>
+                <span>Sepete Ekle — {formatCurrency(product.price * quantity)}</span>
               )}
             </Button>
           </div>
@@ -130,7 +131,7 @@ export default function Product() {
           <div className="space-y-8">
             <div>
               <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground/60 mb-3 flex items-center">
-                <Coffee className="h-4 w-4 mr-2" /> Ingredients
+                <Coffee className="h-4 w-4 mr-2" /> İçindekiler
               </h3>
               <ul className="list-disc pl-5 text-foreground/80 space-y-1">
                 {product.ingredients.map((ing) => (
@@ -140,7 +141,7 @@ export default function Product() {
             </div>
             <div>
               <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground/60 mb-3 flex items-center">
-                <Droplets className="h-4 w-4 mr-2" /> Preparation
+                <Droplets className="h-4 w-4 mr-2" /> Hazırlanışı
               </h3>
               <p className="text-foreground/80 leading-relaxed">
                 {product.preparation}
