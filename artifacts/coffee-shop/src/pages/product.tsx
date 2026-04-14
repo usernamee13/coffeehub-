@@ -14,7 +14,7 @@ export default function Product() {
   const product = getProductById(id || "");
   const addItem = useCartStore((state) => state.addItem);
   const { toast } = useToast();
-  
+
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
@@ -45,9 +45,9 @@ export default function Product() {
         {/* Image Column */}
         <div className="animate-in fade-in slide-in-from-left-8 duration-700">
           <div className="aspect-[4/5] rounded-3xl overflow-hidden shadow-lg border border-border/50 relative bg-muted">
-            <img 
-              src={product.image} 
-              alt={product.name} 
+            <img
+              src={product.image}
+              alt={product.name}
               className="w-full h-full object-cover"
             />
           </div>
@@ -57,11 +57,18 @@ export default function Product() {
         <div className="flex flex-col animate-in fade-in slide-in-from-right-8 duration-700">
           <div className="flex flex-wrap gap-2 mb-4">
             <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 border-transparent rounded-full px-3">
-              {product.roastLevel} Kavrum
+              {product.category}
             </Badge>
-            <Badge variant="outline" className="rounded-full px-3 text-muted-foreground border-border">
-              {product.origin}
-            </Badge>
+            {product.roastLevel && (
+              <Badge variant="outline" className="rounded-full px-3 text-muted-foreground border-border">
+                {product.roastLevel} Kavrum
+              </Badge>
+            )}
+            {product.origin && (
+              <Badge variant="outline" className="rounded-full px-3 text-muted-foreground border-border">
+                {product.origin}
+              </Badge>
+            )}
           </div>
 
           <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">{product.name}</h1>
@@ -92,7 +99,7 @@ export default function Product() {
                 Adet
               </label>
               <div className="flex items-center border border-input rounded-full h-14 bg-background">
-                <button 
+                <button
                   className="px-4 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   disabled={quantity <= 1}
@@ -100,7 +107,7 @@ export default function Product() {
                   -
                 </button>
                 <span className="flex-1 text-center font-medium">{quantity}</span>
-                <button 
+                <button
                   className="px-4 text-muted-foreground hover:text-foreground transition-colors"
                   onClick={() => setQuantity(quantity + 1)}
                 >
@@ -108,9 +115,9 @@ export default function Product() {
                 </button>
               </div>
             </div>
-            
-            <Button 
-              size="lg" 
+
+            <Button
+              size="lg"
               className={`flex-1 h-14 rounded-full text-base relative overflow-hidden transition-all duration-300 ${
                 justAdded ? "bg-green-600 hover:bg-green-700 text-white" : ""
               }`}
@@ -127,7 +134,7 @@ export default function Product() {
             </Button>
           </div>
 
-          {/* Details Accordion style */}
+          {/* Details */}
           <div className="space-y-8">
             <div>
               <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground/60 mb-3 flex items-center">
@@ -148,7 +155,6 @@ export default function Product() {
               </p>
             </div>
           </div>
-          
         </div>
       </div>
     </div>

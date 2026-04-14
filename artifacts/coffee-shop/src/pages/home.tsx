@@ -6,7 +6,11 @@ import { ArrowRight, ChevronRight } from "lucide-react";
 import turkishMenuImage from "@assets/WhatsApp_Image_2026-04-14_at_16.46.09_1776184216155.jpeg";
 
 export default function Home() {
-  const featured = products.slice(0, 3);
+  const featured = [
+    products.find(p => p.id === 'caffee-latte'),
+    products.find(p => p.id === 'ice-caramel-macchiato'),
+    products.find(p => p.id === 'matcha-latte'),
+  ].filter(Boolean) as typeof products;
 
   return (
     <div className="flex flex-col gap-24 pb-24">
@@ -46,7 +50,7 @@ export default function Home() {
         <div className="flex items-end justify-between mb-12">
           <div>
             <h2 className="font-serif text-3xl font-bold mb-2">Sizin İçin Seçtiklerimiz</h2>
-            <p className="text-muted-foreground">Bu sezon en çok sevilen kahvelerimiz.</p>
+            <p className="text-muted-foreground">Sıcak, soğuk ve matcha — öne çıkan içeceklerimiz.</p>
           </div>
           <Link href="/menu" className="hidden md:flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors">
             Tüm kahveleri gör <ArrowRight className="ml-1 h-4 w-4" />
@@ -68,7 +72,7 @@ export default function Home() {
                   />
                   <div className="absolute top-4 left-4">
                     <span className="bg-background/90 backdrop-blur-sm text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm">
-                      {product.roastLevel} Kavrum
+                      {product.roastLevel ? `${product.roastLevel} Kavrum` : product.category}
                     </span>
                   </div>
                 </div>
