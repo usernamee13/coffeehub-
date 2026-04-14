@@ -186,7 +186,7 @@ export const products: Product[] = [
     name: 'Ice White Mocha',
     description: 'Espresso, çikolata ve süt karışımı.',
     price: 120,
-    image: 'https://images.unsplash.com/photo-1579954115563-e72bf1741585?q=80&w=800&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1561047029-3000c68339ca?q=80&w=800&auto=format&fit=crop',
     category: 'Soğuk Kahveler',
     tastingNotes: ['Beyaz çikolata', 'Kremsi', 'Tatlı'],
     ingredients: ['Espresso', 'Beyaz çikolata sos', 'Soğuk süt', 'Buz'],
