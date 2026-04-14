@@ -29,6 +29,25 @@ const staticFallback: ApiProduct[] = staticProducts.map((p) => ({
   createdAt: new Date().toISOString(),
 }));
 
+function mergeProducts(apiData: ApiProduct[]): ApiProduct[] {
+  const apiMap = new Map(apiData.map((p) => [p.id, p]));
+  const merged: ApiProduct[] = [];
+  const seen = new Set<string>();
+
+  for (const sp of staticFallback) {
+    seen.add(sp.id);
+    merged.push(apiMap.get(sp.id) ?? sp);
+  }
+
+  for (const ap of apiData) {
+    if (!seen.has(ap.id)) {
+      merged.push(ap);
+    }
+  }
+
+  return merged;
+}
+
 export function useProducts(adminKey?: string) {
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,8 +61,13 @@ export function useProducts(adminKey?: string) {
       if (adminKey) headers["x-admin-key"] = adminKey;
       const res = await fetch("/api/products", { headers });
       if (!res.ok) throw new Error("API hatası");
-      const data = await res.json();
-      setProducts(data.length > 0 ? data : staticFallback);
+      const data: ApiProduct[] = await res.json();
+
+      if (adminKey) {
+        setProducts(data.length > 0 ? data : staticFallback);
+      } else {
+        setProducts(mergeProducts(data));
+      }
     } catch {
       setProducts(staticFallback);
       if (!adminKey) setError("");
