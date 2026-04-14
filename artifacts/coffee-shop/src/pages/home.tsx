@@ -110,7 +110,7 @@ export default function Home() {
           <div className="md:w-1/2">
             <h2 className="font-serif text-3xl md:text-4xl font-bold mb-6">Özenle kavrulur, keyifle hazırlanır.</h2>
             <p className="text-foreground/80 mb-6 leading-relaxed">
-              Ember & Bean paketlerine giren her çekirdek, lezzeti ve izlenebilirliği düşünülerek seçilir. Küçük üreticilerle kurulan sürdürülebilir ilişkiler sayesinde fincanınıza güvenilir ve karakterli kahveler ulaşır.
+              coffeeHUB paketlerine giren her çekirdek, lezzeti ve izlenebilirliği düşünülerek seçilir. Küçük üreticilerle kurulan sürdürülebilir ilişkiler sayesinde fincanınıza güvenilir ve karakterli kahveler ulaşır.
             </p>
             <p className="text-foreground/80 leading-relaxed">
               Küçük partiler hâlinde kavurduğumuz kahveler, her bölgenin kendine özgü aromasını korur. Sonuç: dengeli, sıcak ve akılda kalan bir kahve deneyimi.

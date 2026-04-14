@@ -37,7 +37,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <Link href="/" className="flex items-center gap-2 group">
             <Coffee className="h-6 w-6 text-primary transition-transform group-hover:-rotate-12" />
             <span className="font-serif font-bold text-xl tracking-tight text-foreground">
-              Ember & Bean
+              coffeeHUB
             </span>
           </Link>
 
@@ -136,7 +136,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <Coffee className="h-5 w-5 text-primary" />
-              <span className="font-serif font-bold text-lg">Ember & Bean</span>
+              <span className="font-serif font-bold text-lg">coffeeHUB</span>
             </div>
             <p className="text-muted-foreground text-sm max-w-xs">
               Mahalle kahvecisi sıcaklığını çevrimiçi deneyime taşıyan özenli kahveler. Her fincanın kendine ait bir hikâyesi var.

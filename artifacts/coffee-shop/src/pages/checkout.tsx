@@ -210,7 +210,7 @@ export default function Checkout() {
                   {[
                     ["credit-card", "Kredi/Banka Kartı", "Demo modunda herhangi bir kart bilgisi girebilirsiniz"],
                     ["digital-wallet", "Dijital Cüzdan", "Apple Pay, Google Pay veya Shop Pay ile ödeyin"],
-                    ["gift-card", "Hediye Kartı", "Ember & Bean hediye kartı bakiyenizi kullanın"],
+                    ["gift-card", "Hediye Kartı", "coffeeHUB hediye kartı bakiyenizi kullanın"],
                   ].map(([value, title, description]) => (
                     <div key={value}>
                       <RadioGroupItem value={value} id={value} className="peer sr-only" />

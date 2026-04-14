@@ -305,7 +305,7 @@ export const products: Product[] = [
   },
   {
     id: 'house-blend-ember',
-    name: 'Ember Ev Harmanı',
+    name: 'coffeeHUB Ev Harmanı',
     description: 'Sıcak, dengeli ve her gün içilebilecek bir fincan için hazırladığımız imza harmanımız. Güney Amerika ve Afrika çekirdeklerinin uyumuyla tatlı çikolata, kavrulmuş kuruyemiş ve hafif meyvemsi bir bitiş sunar.',
     price: 145,
     image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=800&auto=format&fit=crop',
