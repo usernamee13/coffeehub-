@@ -18,7 +18,7 @@ const productSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1),
   price: z.number().int().positive(),
-  image: z.string().min(1),
+  image: z.string().default("https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=800&auto=format&fit=crop"),
   category: z.enum(CATEGORIES),
   roastLevel: z.enum(ROAST_LEVELS).optional(),
   origin: z.string().optional(),

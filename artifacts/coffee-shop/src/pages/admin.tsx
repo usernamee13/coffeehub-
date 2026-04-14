@@ -173,8 +173,11 @@ export default function Admin() {
       ingredients: addForm.ingredients.split(",").map((s) => s.trim()).filter(Boolean),
       preparation: addForm.preparation.trim(),
     };
-    if (!payload.id || !payload.name || !payload.price || !payload.image) {
+    if (!payload.id || !payload.name || !payload.price) {
       setAddError("Zorunlu alanları doldurun."); return;
+    }
+    if (!payload.image) {
+      payload.image = "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=800&auto=format&fit=crop";
     }
     const res = await fetch(`${API_BASE}/products`, {
       method: "POST",
@@ -364,8 +367,8 @@ export default function Admin() {
                     </select>
                   </div>
                   <div className="space-y-1 sm:col-span-2">
-                    <Label>Görsel URL</Label>
-                    <Input placeholder="https://..." value={addForm.image} onChange={(e) => setAddForm((f) => ({ ...f, image: e.target.value }))} className="rounded-xl" required />
+                    <Label>Görsel URL <span className="text-muted-foreground text-xs">(isteğe bağlı)</span></Label>
+                    <Input placeholder="https://... (boş bırakılabilir)" value={addForm.image} onChange={(e) => setAddForm((f) => ({ ...f, image: e.target.value }))} className="rounded-xl" />
                   </div>
                   <div className="space-y-1">
                     <Label>Tat Notaları <span className="text-muted-foreground text-xs">(virgülle ayır)</span></Label>
