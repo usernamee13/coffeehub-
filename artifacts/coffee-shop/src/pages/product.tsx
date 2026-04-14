@@ -1,0 +1,155 @@
+import { useParams, Link } from "wouter";
+import { getProductById } from "@/lib/data";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useCartStore } from "@/store/use-cart";
+import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft, Check, Coffee, Droplets, Leaf } from "lucide-react";
+import { useState } from "react";
+import NotFound from "./not-found";
+
+export default function Product() {
+  const { id } = useParams();
+  const product = getProductById(id || "");
+  const addItem = useCartStore((state) => state.addItem);
+  const { toast } = useToast();
+  
+  const [quantity, setQuantity] = useState(1);
+  const [isAdding, setIsAdding] = useState(false);
+  const [justAdded, setJustAdded] = useState(false);
+
+  if (!product) return <NotFound />;
+
+  const handleAddToCart = () => {
+    setIsAdding(true);
+    setTimeout(() => {
+      addItem(product, quantity);
+      setIsAdding(false);
+      setJustAdded(true);
+      toast({
+        title: "Added to cart",
+        description: `${quantity}x ${product.name} added to your bag.`,
+      });
+      setTimeout(() => setJustAdded(false), 2000);
+    }, 400);
+  };
+
+  return (
+    <div className="container max-w-6xl mx-auto px-6 py-12">
+      <Link href="/menu" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-8 transition-colors">
+        <ArrowLeft className="h-4 w-4 mr-2" /> Back to Menu
+      </Link>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
+        {/* Image Column */}
+        <div className="animate-in fade-in slide-in-from-left-8 duration-700">
+          <div className="aspect-[4/5] rounded-3xl overflow-hidden shadow-lg border border-border/50 relative bg-muted">
+            <img 
+              src={product.image} 
+              alt={product.name} 
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </div>
+
+        {/* Content Column */}
+        <div className="flex flex-col animate-in fade-in slide-in-from-right-8 duration-700">
+          <div className="flex flex-wrap gap-2 mb-4">
+            <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 border-transparent rounded-full px-3">
+              {product.roastLevel} Roast
+            </Badge>
+            <Badge variant="outline" className="rounded-full px-3 text-muted-foreground border-border">
+              {product.origin}
+            </Badge>
+          </div>
+
+          <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">{product.name}</h1>
+          <p className="text-2xl font-light mb-8">${product.price.toFixed(2)}</p>
+
+          <p className="text-lg text-foreground/80 leading-relaxed mb-8">
+            {product.description}
+          </p>
+
+          {/* Tasting Notes */}
+          <div className="mb-10 p-6 bg-secondary rounded-2xl">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground/60 mb-4 flex items-center">
+              <Leaf className="h-4 w-4 mr-2" /> Tasting Notes
+            </h3>
+            <div className="flex flex-wrap gap-3">
+              {product.tastingNotes.map((note) => (
+                <span key={note} className="bg-background px-4 py-2 rounded-full text-sm font-medium shadow-sm">
+                  {note}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Add to Cart Area */}
+          <div className="flex items-end gap-4 mb-12 pb-12 border-b border-border">
+            <div className="w-24">
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">
+                Quantity
+              </label>
+              <div className="flex items-center border border-input rounded-full h-14 bg-background">
+                <button 
+                  className="px-4 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  disabled={quantity <= 1}
+                >
+                  -
+                </button>
+                <span className="flex-1 text-center font-medium">{quantity}</span>
+                <button 
+                  className="px-4 text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setQuantity(quantity + 1)}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+            
+            <Button 
+              size="lg" 
+              className={`flex-1 h-14 rounded-full text-base relative overflow-hidden transition-all duration-300 ${
+                justAdded ? "bg-green-600 hover:bg-green-700 text-white" : ""
+              }`}
+              onClick={handleAddToCart}
+              disabled={isAdding}
+            >
+              {isAdding ? (
+                <span className="flex items-center justify-center animate-pulse">Adding...</span>
+              ) : justAdded ? (
+                <span className="flex items-center justify-center"><Check className="mr-2 h-5 w-5" /> Added</span>
+              ) : (
+                <span>Add to Bag — ${(product.price * quantity).toFixed(2)}</span>
+              )}
+            </Button>
+          </div>
+
+          {/* Details Accordion style */}
+          <div className="space-y-8">
+            <div>
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground/60 mb-3 flex items-center">
+                <Coffee className="h-4 w-4 mr-2" /> Ingredients
+              </h3>
+              <ul className="list-disc pl-5 text-foreground/80 space-y-1">
+                {product.ingredients.map((ing) => (
+                  <li key={ing}>{ing}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground/60 mb-3 flex items-center">
+                <Droplets className="h-4 w-4 mr-2" /> Preparation
+              </h3>
+              <p className="text-foreground/80 leading-relaxed">
+                {product.preparation}
+              </p>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  );
+}
