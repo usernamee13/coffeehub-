@@ -9,23 +9,29 @@ import Product from "@/pages/product";
 import Cart from "@/pages/cart";
 import Checkout from "@/pages/checkout";
 import OrderHistory from "@/pages/order-history";
+import Admin from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
 
 function Router() {
   return (
-    <Layout>
-      <Switch>
-        <Route path="/" component={Home} />
-        <Route path="/menu" component={Menu} />
-        <Route path="/coffee/:id" component={Product} />
-        <Route path="/cart" component={Cart} />
-        <Route path="/checkout" component={Checkout} />
-        <Route path="/order-history" component={OrderHistory} />
-        <Route component={NotFound} />
-      </Switch>
-    </Layout>
+    <Switch>
+      <Route path="/admin" component={Admin} />
+      <Route>
+        <Layout>
+          <Switch>
+            <Route path="/" component={Home} />
+            <Route path="/menu" component={Menu} />
+            <Route path="/coffee/:id" component={Product} />
+            <Route path="/cart" component={Cart} />
+            <Route path="/checkout" component={Checkout} />
+            <Route path="/order-history" component={OrderHistory} />
+            <Route component={NotFound} />
+          </Switch>
+        </Layout>
+      </Route>
+    </Switch>
   );
 }
 

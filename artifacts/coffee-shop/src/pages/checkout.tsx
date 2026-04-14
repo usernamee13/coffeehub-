@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, Link } from "wouter";
 import { useCartStore } from "@/store/use-cart";
 import { formatCurrency } from "@/lib/format";
@@ -19,6 +19,14 @@ export default function Checkout() {
   const [deliveryMethod, setDeliveryMethod] = useState("shipping");
   const [paymentMethod, setPaymentMethod] = useState("credit-card");
 
+  const firstNameRef = useRef<HTMLInputElement>(null);
+  const lastNameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const addressRef = useRef<HTMLInputElement>(null);
+  const cityRef = useRef<HTMLInputElement>(null);
+  const stateRef = useRef<HTMLInputElement>(null);
+  const zipRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     if (items.length === 0 && step === 1) {
       setLocation("/cart");
@@ -34,24 +42,55 @@ export default function Checkout() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handlePlaceOrder = (e: React.FormEvent) => {
+  const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    setTimeout(() => {
-      createOrder({
-        shipping,
-        deliveryMethod,
-        paymentMethod,
+
+    const firstName = firstNameRef.current?.value || "";
+    const lastName = lastNameRef.current?.value || "";
+    const email = emailRef.current?.value || "";
+    const address = addressRef.current?.value || "";
+    const city = cityRef.current?.value || "";
+    const stateName = stateRef.current?.value || "";
+    const zip = zipRef.current?.value || "";
+
+    const customerAddress = deliveryMethod === "shipping"
+      ? `${address}, ${city}, ${stateName} ${zip}`
+      : "Mağazadan Teslim";
+
+    const orderPayload = {
+      customerName: `${firstName} ${lastName}`.trim() || "İsimsiz Müşteri",
+      customerEmail: email || "belirtilmedi@coffeehub.com",
+      customerAddress,
+      items: items.map((i) => ({
+        id: i.product.id,
+        name: i.product.name,
+        quantity: i.quantity,
+        price: i.product.price,
+      })),
+      subtotal: total,
+      shipping,
+      total: finalTotal,
+      paymentMethod,
+    };
+
+    try {
+      await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderPayload),
       });
-      setIsSubmitting(false);
-      clearCart();
-      toast({
-        title: "Siparişiniz alındı!",
-        description: "Fişinizi ve sipariş durumunu e-posta ile paylaşacağız.",
-      });
-      setLocation("/order-history");
-    }, 1500);
+    } catch {
+    }
+
+    createOrder({ shipping, deliveryMethod, paymentMethod });
+    clearCart();
+    setIsSubmitting(false);
+    toast({
+      title: "Siparişiniz alındı!",
+      description: "Siparişiniz işleme alındı, en kısa sürede hazırlanacak.",
+    });
+    setLocation("/order-history");
   };
 
   if (items.length === 0 && step === 1) {
@@ -62,9 +101,7 @@ export default function Checkout() {
     <div className="container max-w-6xl mx-auto px-6 py-12">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
         
-        {/* Main Checkout Flow */}
         <div className="lg:col-span-7">
-          {/* Progress Steps */}
           <div className="flex items-center mb-12">
             <div className={`flex items-center ${step >= 1 ? 'text-primary' : 'text-muted-foreground'}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm border-2 ${step >= 1 ? 'border-primary bg-primary/10' : 'border-muted-foreground/30'}`}>1</div>
@@ -90,16 +127,16 @@ export default function Checkout() {
                   <div className="grid grid-cols-2 gap-5">
                     <div className="space-y-2">
                       <Label htmlFor="firstName">Ad</Label>
-                      <Input id="firstName" required className="h-12 rounded-xl" />
+                      <Input ref={firstNameRef} id="firstName" required className="h-12 rounded-xl" />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="lastName">Soyad</Label>
-                      <Input id="lastName" required className="h-12 rounded-xl" />
+                      <Input ref={lastNameRef} id="lastName" required className="h-12 rounded-xl" />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">E-posta Adresi</Label>
-                    <Input id="email" type="email" required className="h-12 rounded-xl" />
+                    <Input ref={emailRef} id="email" type="email" required className="h-12 rounded-xl" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">Telefon Numarası (İsteğe Bağlı)</Label>
@@ -138,7 +175,7 @@ export default function Checkout() {
                           <p className="text-sm text-muted-foreground">1-3 iş günü içinde teslim</p>
                         </div>
                       </div>
-                      <span className="font-medium">{formatCurrency(shipping)}</span>
+                      <span className="font-medium">{formatCurrency(45)}</span>
                     </Label>
                   </div>
                   <div>
@@ -166,22 +203,22 @@ export default function Checkout() {
                     <h3 className="font-medium mb-2">Teslimat Adresi</h3>
                     <div className="space-y-2">
                       <Label htmlFor="address">Adres</Label>
-                      <Input id="address" required className="h-12 rounded-xl" />
+                      <Input ref={addressRef} id="address" required className="h-12 rounded-xl" />
                     </div>
                     <div className="grid grid-cols-2 gap-5">
                       <div className="space-y-2">
                         <Label htmlFor="city">İlçe / Şehir</Label>
-                        <Input id="city" required className="h-12 rounded-xl" />
+                        <Input ref={cityRef} id="city" required className="h-12 rounded-xl" />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="state">İl</Label>
-                        <Input id="state" required className="h-12 rounded-xl" />
+                        <Input ref={stateRef} id="state" required className="h-12 rounded-xl" />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-5">
                       <div className="space-y-2">
                         <Label htmlFor="zip">Posta Kodu</Label>
-                        <Input id="zip" required className="h-12 rounded-xl" />
+                        <Input ref={zipRef} id="zip" required className="h-12 rounded-xl" />
                       </div>
                     </div>
                   </div>
@@ -272,7 +309,6 @@ export default function Checkout() {
           </div>
         </div>
 
-        {/* Order Summary Sidebar */}
         <div className="lg:col-span-5">
           <div className="bg-secondary rounded-3xl p-8 sticky top-32">
             <h2 className="font-serif text-xl font-semibold mb-6">Sipariş Özeti</h2>
