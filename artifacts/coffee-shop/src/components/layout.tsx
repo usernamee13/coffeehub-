@@ -145,9 +145,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div>
             <h3 className="font-medium mb-4">Bizi Ziyaret Edin</h3>
             <address className="not-italic text-sm text-muted-foreground flex flex-col gap-1">
-              <span>Kavurmacılar Sokak No: 12</span>
-              <span>Moda, Kadıköy</span>
-              <span>İstanbul</span>
+              <a
+                href="https://www.google.com/maps/place/coffeeHUB/@39.9238352,32.8106698,14z/data=!4m10!1m2!2m1!1sHUB!3m6!1s0x14d34fbdb77b6c93:0x7e450955d60888c0!8m2!3d39.9238352!4d32.8456887!15sCgNIVUJaBSIDaHVikgELY29mZmVlX3Nob3CaAURDaTlEUVVsUlFVTnZaRU5vZEhsalJqbHZUMnByZWxwR1JucFNiR3Q0WkVkR2JXRldVbFJWV0VweFdXdDRTMU5HUlJBQuABAPoBBAgXEB4!16s%2Fg%2F11kb7q98r7?entry=ttu"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary transition-colors underline-offset-2 hover:underline"
+              >
+                <span>coffeeHUB</span>
+                <span className="block">Çankaya, Ankara</span>
+              </a>
             </address>
           </div>
           <div>
