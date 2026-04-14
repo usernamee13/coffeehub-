@@ -15,7 +15,7 @@ export default function Menu() {
 
   return (
     <div className="container max-w-6xl mx-auto px-6 py-12">
-      <div className="max-w-2xl mb-16 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="max-w-2xl mb-16">
         <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">Kahve Menümüz</h1>
         <p className="text-lg text-muted-foreground leading-relaxed">
           Sıcak kahvelerden soğuk içeceklere, matchadan çekirdek kahvelere kadar özenle hazırlanmış tüm seçeneklerimizi keşfedin.
@@ -42,12 +42,9 @@ export default function Menu() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {categoryProducts.map((product, i) => (
+                  {categoryProducts.map((product) => (
                     <Link key={product.id} href={`/coffee/${product.id}`} className="group block">
-                      <div
-                        className="rounded-2xl overflow-hidden bg-card border border-border hover:border-primary/50 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col animate-in fade-in slide-in-from-bottom-8 fill-mode-both"
-                        style={{ animationDelay: `${i * 80}ms` }}
-                      >
+                      <div className="rounded-2xl overflow-hidden bg-card border border-border hover:border-primary/50 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col">
                         <div className="aspect-[4/3] overflow-hidden relative bg-muted">
                           <img
                             src={product.image}
@@ -66,12 +63,12 @@ export default function Menu() {
                           {(product.roastLevel || product.origin) && (
                             <div className="flex flex-wrap gap-2 mb-3">
                               {product.roastLevel && (
-                                <Badge variant="secondary" className="font-normal bg-secondary hover:bg-secondary text-secondary-foreground text-xs">
+                                <Badge variant="secondary" className="font-normal text-xs">
                                   {product.roastLevel} Kavrum
                                 </Badge>
                               )}
                               {product.origin && (
-                                <Badge variant="outline" className="font-normal text-muted-foreground border-border text-xs">
+                                <Badge variant="outline" className="font-normal text-muted-foreground text-xs">
                                   {product.origin.split(',')[0]}
                                 </Badge>
                               )}

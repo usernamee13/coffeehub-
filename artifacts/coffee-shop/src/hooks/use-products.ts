@@ -43,7 +43,7 @@ export function useProducts(adminKey?: string) {
       const res = await fetch("/api/products", { headers });
       if (!res.ok) throw new Error("API hatası");
       const data = await res.json();
-      setProducts(data);
+      setProducts(data.length > 0 ? data : staticFallback);
     } catch {
       setProducts(staticFallback);
       if (!adminKey) setError("");
