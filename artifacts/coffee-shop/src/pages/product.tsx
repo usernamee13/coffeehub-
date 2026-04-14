@@ -20,18 +20,30 @@ export default function Product() {
   const [justAdded, setJustAdded] = useState(false);
 
   useEffect(() => {
+    const toApi = (p: any): ApiProduct => ({
+      ...p,
+      roastLevel: p.roastLevel ?? null,
+      origin: p.origin ?? null,
+      available: p.available ?? true,
+      availableUntil: p.availableUntil ?? null,
+      createdAt: p.createdAt ?? new Date().toISOString(),
+    });
+
     fetch("/api/products")
       .then((r) => r.json())
       .then((data: ApiProduct[]) => {
-        const found = data.find((p) => p.id === id);
-        setProduct(found ?? null);
+        const apiMap = new Map(data.map((p) => [p.id, p]));
+        const apiProduct = apiMap.get(id || "");
+        if (apiProduct) {
+          setProduct(apiProduct);
+        } else {
+          const sp = staticProducts.find((p) => p.id === id);
+          setProduct(sp ? toApi(sp) : null);
+        }
       })
       .catch(() => {
-        const fallback = staticProducts.find((p) => p.id === id);
-        setProduct(fallback
-          ? { ...fallback, roastLevel: fallback.roastLevel ?? null, origin: fallback.origin ?? null, available: true, availableUntil: null, createdAt: new Date().toISOString() }
-          : null
-        );
+        const sp = staticProducts.find((p) => p.id === id);
+        setProduct(sp ? toApi(sp) : null);
       });
   }, [id]);
 
