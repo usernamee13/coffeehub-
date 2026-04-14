@@ -16,6 +16,20 @@ const STATIC_FALLBACK: ApiProduct[] = staticProducts.map((p) => ({
   createdAt: new Date().toISOString(),
 }));
 
+function mergeWithStatic(apiData: ApiProduct[]): ApiProduct[] {
+  const apiMap = new Map(apiData.map((p) => [p.id, p]));
+  const merged: ApiProduct[] = [];
+  const seen = new Set<string>();
+  for (const sp of STATIC_FALLBACK) {
+    seen.add(sp.id);
+    merged.push(apiMap.get(sp.id) ?? sp);
+  }
+  for (const ap of apiData) {
+    if (!seen.has(ap.id)) merged.push(ap);
+  }
+  return merged;
+}
+
 function slugify(text: string) {
   return text
     .toLowerCase()
@@ -104,7 +118,7 @@ export default function Admin() {
       const res = await fetch(`${API_BASE}/products`, { headers: { "x-admin-key": key } });
       if (!res.ok) throw new Error("api_error");
       const data = await res.json();
-      setProducts(data.length > 0 ? data : STATIC_FALLBACK);
+      setProducts(mergeWithStatic(data));
     } catch {
       setProducts(STATIC_FALLBACK);
     } finally {
