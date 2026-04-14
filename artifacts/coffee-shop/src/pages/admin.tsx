@@ -1,10 +1,29 @@
 import { useState, useEffect } from "react";
-import { Coffee, Package, TrendingUp, Clock, CheckCircle, Trash2, PenLine, Eye, EyeOff, Plus, X } from "lucide-react";
+import { Coffee, TrendingUp, Clock, CheckCircle, Trash2, PenLine, Eye, EyeOff, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatCurrency } from "@/lib/format";
 import { type ApiProduct, CATEGORIES } from "@/hooks/use-products";
+import { products as staticProducts } from "@/lib/data";
+
+const STATIC_FALLBACK: ApiProduct[] = staticProducts.map((p) => ({
+  ...p,
+  roastLevel: p.roastLevel ?? null,
+  origin: p.origin ?? null,
+  available: true,
+  availableUntil: null,
+  createdAt: new Date().toISOString(),
+}));
+
+function slugify(text: string) {
+  return text
+    .toLowerCase()
+    .replace(/ş/g, "s").replace(/ğ/g, "g").replace(/ü/g, "u")
+    .replace(/ı/g, "i").replace(/ö/g, "o").replace(/ç/g, "c")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
 
 const ADMIN_KEY_STORAGE = "coffeehub-admin-key";
 const API_BASE = "/api";
@@ -78,14 +97,19 @@ export default function Admin() {
     finally { setOrdersLoading(false); }
   };
 
-  // Fetch products (admin sees all)
+  // Fetch products (admin sees all); falls back to static list if API is unavailable
   const fetchProducts = async (key: string) => {
     setProductsLoading(true);
     try {
       const res = await fetch(`${API_BASE}/products`, { headers: { "x-admin-key": key } });
-      setProducts(await res.json());
-    } catch { }
-    finally { setProductsLoading(false); }
+      if (!res.ok) throw new Error("api_error");
+      const data = await res.json();
+      setProducts(data.length > 0 ? data : STATIC_FALLBACK);
+    } catch {
+      setProducts(STATIC_FALLBACK);
+    } finally {
+      setProductsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -162,23 +186,19 @@ export default function Admin() {
   const submitAddForm = async (e: React.FormEvent) => {
     e.preventDefault();
     setAddError("");
+    const name = addForm.name.trim() || "Yeni Ürün";
+    const autoId = addForm.id.trim() || (slugify(name) + "-" + Date.now().toString().slice(-4));
     const payload = {
-      id: addForm.id.trim(),
-      name: addForm.name.trim(),
-      description: addForm.description.trim(),
-      price: parseInt(addForm.price, 10),
-      image: addForm.image.trim(),
+      id: autoId,
+      name,
+      description: addForm.description.trim() || "",
+      price: parseInt(addForm.price, 10) || 100,
+      image: addForm.image.trim() || "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=800&auto=format&fit=crop",
       category: addForm.category,
       tastingNotes: addForm.tastingNotes.split(",").map((s) => s.trim()).filter(Boolean),
       ingredients: addForm.ingredients.split(",").map((s) => s.trim()).filter(Boolean),
-      preparation: addForm.preparation.trim(),
+      preparation: addForm.preparation.trim() || "",
     };
-    if (!payload.id || !payload.name || !payload.price) {
-      setAddError("Zorunlu alanları doldurun."); return;
-    }
-    if (!payload.image) {
-      payload.image = "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=800&auto=format&fit=crop";
-    }
     const res = await fetch(`${API_BASE}/products`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-admin-key": adminKey },
@@ -341,20 +361,20 @@ export default function Admin() {
                 </div>
                 <form onSubmit={submitAddForm} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <Label>Ürün ID <span className="text-muted-foreground text-xs">(küçük harf, tire)</span></Label>
-                    <Input placeholder="ice-latte-2" value={addForm.id} onChange={(e) => setAddForm((f) => ({ ...f, id: e.target.value }))} className="rounded-xl" required />
+                    <Label>Ürün ID <span className="text-muted-foreground text-xs">(boş bırakılabilir, otomatik oluşur)</span></Label>
+                    <Input placeholder="ice-latte-2" value={addForm.id} onChange={(e) => setAddForm((f) => ({ ...f, id: e.target.value }))} className="rounded-xl" />
                   </div>
                   <div className="space-y-1">
-                    <Label>Ürün Adı</Label>
-                    <Input placeholder="Ice Latte" value={addForm.name} onChange={(e) => setAddForm((f) => ({ ...f, name: e.target.value }))} className="rounded-xl" required />
+                    <Label>Ürün Adı <span className="text-muted-foreground text-xs">(isteğe bağlı)</span></Label>
+                    <Input placeholder="Ice Latte" value={addForm.name} onChange={(e) => setAddForm((f) => ({ ...f, name: e.target.value }))} className="rounded-xl" />
                   </div>
                   <div className="space-y-1 sm:col-span-2">
-                    <Label>Açıklama</Label>
-                    <Input placeholder="Kısa açıklama..." value={addForm.description} onChange={(e) => setAddForm((f) => ({ ...f, description: e.target.value }))} className="rounded-xl" required />
+                    <Label>Açıklama <span className="text-muted-foreground text-xs">(isteğe bağlı)</span></Label>
+                    <Input placeholder="Kısa açıklama..." value={addForm.description} onChange={(e) => setAddForm((f) => ({ ...f, description: e.target.value }))} className="rounded-xl" />
                   </div>
                   <div className="space-y-1">
-                    <Label>Fiyat (₺)</Label>
-                    <Input type="number" placeholder="120" value={addForm.price} onChange={(e) => setAddForm((f) => ({ ...f, price: e.target.value }))} className="rounded-xl" required />
+                    <Label>Fiyat (₺) <span className="text-muted-foreground text-xs">(boş = ₺100)</span></Label>
+                    <Input type="number" placeholder="120" value={addForm.price} onChange={(e) => setAddForm((f) => ({ ...f, price: e.target.value }))} className="rounded-xl" />
                   </div>
                   <div className="space-y-1">
                     <Label>Kategori</Label>
@@ -371,15 +391,15 @@ export default function Admin() {
                     <Input placeholder="https://... (boş bırakılabilir)" value={addForm.image} onChange={(e) => setAddForm((f) => ({ ...f, image: e.target.value }))} className="rounded-xl" />
                   </div>
                   <div className="space-y-1">
-                    <Label>Tat Notaları <span className="text-muted-foreground text-xs">(virgülle ayır)</span></Label>
+                    <Label>Tat Notaları <span className="text-muted-foreground text-xs">(virgülle ayır, isteğe bağlı)</span></Label>
                     <Input placeholder="Tatlı, Kremsi, Karamel" value={addForm.tastingNotes} onChange={(e) => setAddForm((f) => ({ ...f, tastingNotes: e.target.value }))} className="rounded-xl" />
                   </div>
                   <div className="space-y-1">
-                    <Label>İçindekiler <span className="text-muted-foreground text-xs">(virgülle ayır)</span></Label>
+                    <Label>İçindekiler <span className="text-muted-foreground text-xs">(virgülle ayır, isteğe bağlı)</span></Label>
                     <Input placeholder="Espresso, Süt, Buz" value={addForm.ingredients} onChange={(e) => setAddForm((f) => ({ ...f, ingredients: e.target.value }))} className="rounded-xl" />
                   </div>
                   <div className="space-y-1 sm:col-span-2">
-                    <Label>Hazırlanışı</Label>
+                    <Label>Hazırlanışı <span className="text-muted-foreground text-xs">(isteğe bağlı)</span></Label>
                     <Input placeholder="Kısa hazırlanış tarifi..." value={addForm.preparation} onChange={(e) => setAddForm((f) => ({ ...f, preparation: e.target.value }))} className="rounded-xl" />
                   </div>
                   {addError && <p className="text-destructive text-sm sm:col-span-2">{addError}</p>}
