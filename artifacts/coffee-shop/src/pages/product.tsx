@@ -1,6 +1,7 @@
 import { useParams, Link } from "wouter";
 import { useEffect, useState } from "react";
 import { type ApiProduct } from "@/hooks/use-products";
+import { products as staticProducts } from "@/lib/data";
 import { formatCurrency } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +27,13 @@ export default function Product() {
         const found = data.find((p) => p.id === id);
         setProduct(found || null);
       })
-      .catch(() => setProduct(null));
+      .catch(() => {
+        const fallback = staticProducts.find((p) => p.id === id);
+        setProduct(fallback
+          ? { ...fallback, roastLevel: fallback.roastLevel ?? null, origin: fallback.origin ?? null, available: true, availableUntil: null, createdAt: new Date().toISOString() }
+          : null
+        );
+      });
   }, [id]);
 
   if (product === undefined) {

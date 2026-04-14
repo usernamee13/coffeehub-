@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { products as staticProducts } from "@/lib/data";
 
 export interface ApiProduct {
   id: string;
@@ -19,6 +20,15 @@ export interface ApiProduct {
 
 export const CATEGORIES = ["Sıcak Kahveler", "Soğuk Kahveler", "Matcha", "Çekirdek Kahveler"] as const;
 
+const staticFallback: ApiProduct[] = staticProducts.map((p) => ({
+  ...p,
+  roastLevel: p.roastLevel ?? null,
+  origin: p.origin ?? null,
+  available: true,
+  availableUntil: null,
+  createdAt: new Date().toISOString(),
+}));
+
 export function useProducts(adminKey?: string) {
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,15 +36,17 @@ export function useProducts(adminKey?: string) {
 
   const fetchProducts = async () => {
     setLoading(true);
+    setError("");
     try {
       const headers: Record<string, string> = {};
       if (adminKey) headers["x-admin-key"] = adminKey;
       const res = await fetch("/api/products", { headers });
-      if (!res.ok) throw new Error("Ürünler yüklenemedi");
+      if (!res.ok) throw new Error("API hatası");
       const data = await res.json();
       setProducts(data);
-    } catch (e: any) {
-      setError(e.message || "Hata oluştu");
+    } catch {
+      setProducts(staticFallback);
+      if (!adminKey) setError("");
     } finally {
       setLoading(false);
     }
