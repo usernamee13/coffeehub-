@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/store/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Check, Coffee, Droplets, Leaf } from "lucide-react";
-import { customFetch } from "@workspace/api-client-react/src/custom-fetch";
+import { customFetch } from "@workspace/api-client-react";
 import NotFound from "./not-found";
 
 export default function Product() {
@@ -60,7 +60,7 @@ export default function Product() {
   const handleAddToCart = () => {
     setIsAdding(true);
     setTimeout(() => {
-      addItem({ ...product, tastingNotes: product.tastingNotes ?? [], ingredients: product.ingredients ?? [] }, quantity);
+      addItem({ ...product, tastingNotes: product.tastingNotes ?? [], ingredients: product.ingredients ?? [] } as any, quantity);
       setIsAdding(false);
       setJustAdded(true);
       toast({

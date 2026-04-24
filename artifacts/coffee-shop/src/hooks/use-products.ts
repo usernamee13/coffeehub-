@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { products as staticProducts } from "@/lib/data";
-import { customFetch } from "@workspace/api-client-react/src/custom-fetch";
+import { customFetch } from "@workspace/api-client-react";
+
+export const CATEGORIES = ["Sıcak Kahveler", "Soğuk Kahveler", "Matcha", "Çekirdek Kahveler"] as const;
 
 export interface ApiProduct {
   id: string;
@@ -8,7 +10,7 @@ export interface ApiProduct {
   description: string;
   price: number;
   image: string;
-  category: string;
+  category: typeof CATEGORIES[number];
   roastLevel: string | null;
   origin: string | null;
   tastingNotes: string[];
@@ -18,8 +20,6 @@ export interface ApiProduct {
   availableUntil: string | null;
   createdAt: string;
 }
-
-export const CATEGORIES = ["Sıcak Kahveler", "Soğuk Kahveler", "Matcha", "Çekirdek Kahveler"] as const;
 
 const staticFallback: ApiProduct[] = staticProducts.map((p) => ({
   ...p,

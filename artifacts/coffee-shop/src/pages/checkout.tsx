@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { CreditCard, Truck, Store } from "lucide-react";
-import { customFetch } from "@workspace/api-client-react/src/custom-fetch";
+import { customFetch } from "@workspace/api-client-react";
 
 export default function Checkout() {
   const [, setLocation] = useLocation();
