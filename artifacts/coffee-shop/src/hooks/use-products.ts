@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { products as staticProducts } from "@/lib/data";
+import { customFetch } from "@workspace/api-client-react/src/custom-fetch";
 
 export interface ApiProduct {
   id: string;
@@ -59,9 +60,7 @@ export function useProducts(adminKey?: string) {
     try {
       const headers: Record<string, string> = {};
       if (adminKey) headers["x-admin-key"] = adminKey;
-      const res = await fetch("/api/products", { headers });
-      if (!res.ok) throw new Error("API hatası");
-      const data: ApiProduct[] = await res.json();
+      const data = await customFetch<ApiProduct[]>("/api/products", { headers });
 
       if (adminKey) {
         setProducts(data.length > 0 ? data : staticFallback);

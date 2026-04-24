@@ -40,7 +40,8 @@ function slugify(text: string) {
 }
 
 const ADMIN_KEY_STORAGE = "coffeehub-admin-key";
-const API_BASE = "/api";
+const BASE = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/+$/, "") : "";
+const API_BASE = `${BASE}/api`;
 
 interface Order {
   id: number;

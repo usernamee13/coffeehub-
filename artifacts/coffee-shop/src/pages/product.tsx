@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/store/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Check, Coffee, Droplets, Leaf } from "lucide-react";
+import { customFetch } from "@workspace/api-client-react/src/custom-fetch";
 import NotFound from "./not-found";
 
 export default function Product() {
@@ -29,8 +30,7 @@ export default function Product() {
       createdAt: p.createdAt ?? new Date().toISOString(),
     });
 
-    fetch("/api/products")
-      .then((r) => r.json())
+    customFetch<ApiProduct[]>("/api/products")
       .then((data: ApiProduct[]) => {
         const apiMap = new Map(data.map((p) => [p.id, p]));
         const apiProduct = apiMap.get(id || "");

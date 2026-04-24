@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { CreditCard, Truck, Store } from "lucide-react";
+import { customFetch } from "@workspace/api-client-react/src/custom-fetch";
 
 export default function Checkout() {
   const [, setLocation] = useLocation();
@@ -75,7 +76,7 @@ export default function Checkout() {
     };
 
     try {
-      await fetch("/api/orders", {
+      await customFetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderPayload),
