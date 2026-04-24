@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { products, type Product } from "@/lib/data";
+import { getGameDiscount, DISCOUNT_KEY } from "@/lib/game-logic";
 
 export interface CartItem {
   product: Product;
@@ -34,6 +35,7 @@ interface CartStore {
     paymentMethod: string;
   }) => Order | null;
   total: number;
+  refresh: () => void;
 }
 
 type PersistedState = {
@@ -44,8 +46,16 @@ type PersistedState = {
 const storageKey = "ember-bean-tr-cart";
 const listeners = new Set<() => void>();
 
-const calculateTotal = (items: CartItem[]) =>
-  items.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
+const calculateTotal = (items: CartItem[]) => {
+  const discount = getGameDiscount();
+  return items.reduce((acc, item) => {
+    let price = item.product.price;
+    if (discount && discount.productId === item.product.id) {
+      price = discount.discountedPrice;
+    }
+    return acc + price * item.quantity;
+  }, 0);
+};
 
 const localizeItems = (items: CartItem[]) =>
   items.map((item) => ({
@@ -171,6 +181,11 @@ function buildSnapshot(): CartStore {
     items: state.items,
     orders: state.orders,
     total: calculateTotal(state.items),
+    refresh: () => {
+      state = loadState();
+      snapshot = buildSnapshot();
+      listeners.forEach((l) => l());
+    },
     addItem,
     removeItem,
     updateQuantity,
@@ -180,6 +195,16 @@ function buildSnapshot(): CartStore {
 }
 
 snapshot = buildSnapshot();
+
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", (e) => {
+    if (e.key === storageKey || e.key === DISCOUNT_KEY) {
+      state = loadState();
+      snapshot = buildSnapshot();
+      listeners.forEach((l) => l());
+    }
+  });
+}
 
 function subscribe(listener: () => void) {
   listeners.add(listener);

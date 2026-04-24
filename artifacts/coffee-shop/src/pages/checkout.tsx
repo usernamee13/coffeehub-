@@ -7,12 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
-import { CreditCard, Truck, Store } from "lucide-react";
+import { CreditCard, Truck, Store, Gift } from "lucide-react";
+import { getGameDiscount } from "@/lib/game-logic";
 import { customFetch } from "@workspace/api-client-react";
 
 export default function Checkout() {
   const [, setLocation] = useLocation();
   const { items, total, clearCart, createOrder } = useCartStore();
+  const gameDiscount = getGameDiscount();
   const { toast } = useToast();
   
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -324,8 +326,15 @@ export default function Checkout() {
                     <p className="font-medium leading-tight mb-1">{item.product.name}</p>
                     <p className="text-muted-foreground">Adet: {item.quantity}</p>
                   </div>
-                  <div className="text-sm font-medium">
-                    {formatCurrency(item.product.price * item.quantity)}
+                  <div className="text-sm font-medium text-right">
+                    {gameDiscount && gameDiscount.productId === item.product.id ? (
+                      <>
+                        <div className="text-muted-foreground line-through text-xs">{formatCurrency(item.product.price * item.quantity)}</div>
+                        <div className="text-green-600">{formatCurrency(gameDiscount.discountedPrice * item.quantity)}</div>
+                      </>
+                    ) : (
+                      formatCurrency(item.product.price * item.quantity)
+                    )}
                   </div>
                 </div>
               ))}
@@ -336,6 +345,12 @@ export default function Checkout() {
                 <span>Ara Toplam</span>
                 <span>{formatCurrency(total)}</span>
               </div>
+              {gameDiscount && items.some(i => i.product.id === gameDiscount.productId) && (
+                <div className="flex justify-between text-green-600">
+                  <span className="flex items-center gap-1.5"><Gift className="h-4 w-4" /> Oyun İndirimi</span>
+                  <span>-%{gameDiscount.percent}</span>
+                </div>
+              )}
               <div className="flex justify-between text-foreground/80">
                 <span>Teslimat</span>
                 <span>{step >= 2 ? (shipping > 0 ? formatCurrency(shipping) : "Ücretsiz") : "Sonraki adımda hesaplanır"}</span>

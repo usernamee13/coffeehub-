@@ -2,10 +2,12 @@ import { Link } from "wouter";
 import { useCartStore } from "@/store/use-cart";
 import { formatCurrency } from "@/lib/format";
 import { Button } from "@/components/ui/button";
-import { Trash2, ArrowRight, ShoppingBag } from "lucide-react";
+import { Trash2, ArrowRight, ShoppingBag, Gift } from "lucide-react";
+import { getGameDiscount } from "@/lib/game-logic";
 
 export default function Cart() {
   const { items, updateQuantity, removeItem, total } = useCartStore();
+  const gameDiscount = getGameDiscount();
 
   if (items.length === 0) {
     return (
@@ -48,7 +50,20 @@ export default function Cart() {
                     <Link href={`/coffee/${item.product.id}`} className="hover:text-primary transition-colors">
                       <h3 className="font-serif text-lg font-semibold">{item.product.name}</h3>
                     </Link>
-                    <span className="font-medium text-lg">{formatCurrency(item.product.price * item.quantity)}</span>
+                    <div className="flex flex-col items-end">
+                      {gameDiscount && gameDiscount.productId === item.product.id ? (
+                        <>
+                          <span className="text-sm text-muted-foreground line-through">
+                            {formatCurrency(item.product.price * item.quantity)}
+                          </span>
+                          <span className="font-bold text-lg text-green-600">
+                            {formatCurrency(gameDiscount.discountedPrice * item.quantity)}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="font-medium text-lg">{formatCurrency(item.product.price * item.quantity)}</span>
+                      )}
+                    </div>
                   </div>
                   
                   <p className="text-sm text-muted-foreground mb-4">{item.product.roastLevel} Kavrum</p>
@@ -94,6 +109,12 @@ export default function Cart() {
                 <span>Ara Toplam</span>
                 <span>{formatCurrency(total)}</span>
               </div>
+              {gameDiscount && items.some(i => i.product.id === gameDiscount.productId) && (
+                <div className="flex justify-between text-green-600 font-medium animate-in fade-in slide-in-from-top-1">
+                  <span className="flex items-center gap-1.5"><Gift className="h-4 w-4" /> Oyun İndirimi</span>
+                  <span>-%{gameDiscount.percent}</span>
+                </div>
+              )}
               <div className="flex justify-between text-foreground/80">
                 <span>Teslimat</span>
                 <span>Ödeme adımında hesaplanır</span>

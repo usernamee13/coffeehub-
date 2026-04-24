@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "wouter";
-import { Shuffle, Trophy, ArrowLeft, RotateCcw } from "lucide-react";
+import { Shuffle, Trophy, ArrowLeft, RotateCcw, Heart, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/format";
 import { products } from "@/lib/data";
+import { useCartStore } from "@/store/use-cart";
 
 // 6 pairs of coffee-themed emojis (12 cards total, 3x4 grid)
 const CARD_EMOJIS = ["☕", "🫘", "🍵", "🧋", "🍫", "🥐"];
-const DISCOUNT_KEY = "coffeehub-game-discount";
+import { getGameDiscount, DISCOUNT_KEY, type GameDiscount } from "@/lib/game-logic";
 
 interface Card {
   id: number;
@@ -34,33 +35,19 @@ function createCards(): Card[] {
   }));
 }
 
-export interface GameDiscount {
-  productId: string;
-  productName: string;
-  originalPrice: number;
-  discountedPrice: number;
-  percent: number;
-  expiresAt: number; // timestamp
-}
-
-export function getGameDiscount(): GameDiscount | null {
-  try {
-    const raw = localStorage.getItem(DISCOUNT_KEY);
-    if (!raw) return null;
-    const d: GameDiscount = JSON.parse(raw);
-    if (Date.now() > d.expiresAt) { localStorage.removeItem(DISCOUNT_KEY); return null; }
-    return d;
-  } catch { return null; }
-}
+// Moved interfaces to lib/game-logic.ts
 
 export default function Game() {
   const [cards, setCards] = useState<Card[]>(createCards);
   const [flipped, setFlipped] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
+  const [lives, setLives] = useState(3);
   const [locked, setLocked] = useState(false);
   const [won, setWon] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
   const [discount, setDiscount] = useState<GameDiscount | null>(null);
   const [existingDiscount] = useState<GameDiscount | null>(() => getGameDiscount());
+  const refreshCart = useCartStore(s => s.refresh);
 
   const matchedCount = cards.filter((c) => c.isMatched).length;
   const totalPairs = CARD_EMOJIS.length;
@@ -69,8 +56,10 @@ export default function Game() {
     setCards(createCards());
     setFlipped([]);
     setMoves(0);
+    setLives(3);
     setLocked(false);
     setWon(false);
+    setGameOver(false);
     setDiscount(null);
   }, []);
 
@@ -107,6 +96,15 @@ export default function Game() {
           );
           setFlipped([]);
           setLocked(false);
+          
+          setLives((prev) => {
+            const next = prev - 1;
+            if (next <= 0) {
+              setGameOver(true);
+              setLocked(true);
+            }
+            return next;
+          });
         }, 900);
       }
       setFlipped([]);
@@ -117,7 +115,7 @@ export default function Game() {
 
   // Check win
   useEffect(() => {
-    if (matchedCount === totalPairs * 2 && !won) {
+    if (matchedCount === totalPairs * 2 && !won && !gameOver) {
       setWon(true);
       // Pick a random available product
       const available = products.filter((p) => p.available !== false);
@@ -133,8 +131,9 @@ export default function Game() {
       };
       localStorage.setItem(DISCOUNT_KEY, JSON.stringify(d));
       setDiscount(d);
+      refreshCart();
     }
-  }, [matchedCount, won]);
+  }, [matchedCount, won, gameOver, refreshCart]);
 
   const EMOJI_COLORS: Record<string, string> = {
     "☕": "bg-amber-50 border-amber-200",
@@ -153,9 +152,15 @@ export default function Game() {
           <Link href="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-4 w-4" /> Ana Sayfa
           </Link>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Shuffle className="h-4 w-4" />
-            <span>{moves} hamle</span>
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1.5 text-rose-500 font-semibold">
+              <Heart className={`h-4 w-4 ${lives === 1 ? 'animate-pulse' : ''} fill-current`} />
+              <span>{lives} Hak</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Shuffle className="h-4 w-4" />
+              <span>{moves} hamle</span>
+            </div>
           </div>
         </div>
 
@@ -231,7 +236,7 @@ export default function Game() {
         {won && discount && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-card rounded-3xl p-8 max-w-sm w-full shadow-2xl text-center animate-in zoom-in-95 duration-300">
-              <div className="text-6xl mb-4">🏆</div>
+              <div className="text-6xl mb-4 animate-bounce">🏆</div>
               <h2 className="font-serif text-2xl font-bold mb-2">Tebrikler!</h2>
               <p className="text-muted-foreground text-sm mb-6">
                 {moves} hamlede tüm çiftleri buldun! Sana özel bir indirim kazandın:
@@ -257,6 +262,32 @@ export default function Game() {
                 <Button variant="outline" onClick={resetGame} className="w-full rounded-full gap-2">
                   <RotateCcw className="h-4 w-4" /> Tekrar Oyna
                 </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Game Over Modal */}
+        {gameOver && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-card rounded-3xl p-8 max-w-sm w-full shadow-2xl text-center animate-in zoom-in-95 duration-300">
+              <div className="text-6xl mb-4 text-rose-500">
+                <XCircle className="h-20 w-20 mx-auto" />
+              </div>
+              <h2 className="font-serif text-2xl font-bold mb-2">Hakkın Bitti!</h2>
+              <p className="text-muted-foreground text-sm mb-8">
+                Maalesef 3 hata yaparak tüm haklarını tükettin. Üzülme, tekrar deneyebilirsin!
+              </p>
+
+              <div className="flex flex-col gap-3">
+                <Button onClick={resetGame} className="w-full rounded-full gap-2 py-6 text-lg">
+                  <RotateCcw className="h-5 w-5" /> Yeniden Dene
+                </Button>
+                <Link href="/">
+                  <Button variant="ghost" className="w-full rounded-full text-muted-foreground">
+                    Ana Sayfaya Dön
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
