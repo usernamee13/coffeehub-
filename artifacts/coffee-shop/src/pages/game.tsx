@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "wouter";
-import { Shuffle, Trophy, ArrowLeft, RotateCcw, Heart, XCircle } from "lucide-react";
+import { Shuffle, Trophy, ArrowLeft, RotateCcw, Heart, XCircle, Coffee, HelpCircle, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/format";
 import { products } from "@/lib/data";
@@ -45,6 +45,8 @@ export default function Game() {
   const [locked, setLocked] = useState(false);
   const [won, setWon] = useState(false);
   const [gameOver, setGameOver] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(true);
+  const [isPreviewing, setIsPreviewing] = useState(false);
   const [discount, setDiscount] = useState<GameDiscount | null>(null);
   const [existingDiscount] = useState<GameDiscount | null>(() => getGameDiscount());
   const refreshCart = useCartStore(s => s.refresh);
@@ -61,10 +63,28 @@ export default function Game() {
     setWon(false);
     setGameOver(false);
     setDiscount(null);
+    
+    // Start preview after reset
+    setIsPreviewing(true);
+    setLocked(true);
+    setTimeout(() => {
+      setIsPreviewing(false);
+      setLocked(false);
+    }, 2000);
   }, []);
 
+  const startGame = () => {
+    setShowInstructions(false);
+    setIsPreviewing(true);
+    setLocked(true);
+    setTimeout(() => {
+      setIsPreviewing(false);
+      setLocked(false);
+    }, 2000);
+  };
+
   const handleFlip = (id: number) => {
-    if (locked) return;
+    if (locked || isPreviewing) return;
     const card = cards.find((c) => c.id === id);
     if (!card || card.isFlipped || card.isMatched) return;
     if (flipped.length === 1 && flipped[0] === id) return;
@@ -208,17 +228,17 @@ export default function Game() {
               className={`relative aspect-square rounded-2xl border-2 text-3xl font-bold transition-all duration-300 select-none
                 ${card.isMatched
                   ? `${EMOJI_COLORS[card.emoji]} opacity-60 scale-95 cursor-default`
-                  : card.isFlipped
+                  : (card.isFlipped || isPreviewing)
                   ? `${EMOJI_COLORS[card.emoji]} scale-105 shadow-md`
                   : "bg-gradient-to-br from-amber-700 to-stone-800 border-amber-900 text-transparent hover:scale-105 hover:shadow-lg cursor-pointer active:scale-95"
                 }
               `}
               style={{ backfaceVisibility: "hidden" }}
             >
-              <span className={card.isFlipped || card.isMatched ? "opacity-100" : "opacity-0"}>
+              <span className={card.isFlipped || card.isMatched || isPreviewing ? "opacity-100" : "opacity-0"}>
                 {card.emoji}
               </span>
-              {!card.isFlipped && !card.isMatched && (
+              {!card.isFlipped && !card.isMatched && !isPreviewing && (
                 <span className="absolute inset-0 flex items-center justify-center text-amber-300 text-2xl opacity-20">☕</span>
               )}
             </button>
@@ -289,6 +309,37 @@ export default function Game() {
                   </Button>
                 </Link>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tutorial Modal */}
+        {showInstructions && (
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[60] p-4">
+            <div className="bg-card rounded-[2rem] p-8 max-w-sm w-full shadow-2xl border border-border animate-in zoom-in-95 duration-300">
+              <div className="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+                <HelpCircle className="h-8 w-8 text-amber-600" />
+              </div>
+              <h2 className="font-serif text-2xl font-bold mb-4 text-center">Nasıl Oynanır?</h2>
+              
+              <div className="space-y-4 mb-8">
+                <div className="flex gap-3">
+                  <div className="w-6 h-6 rounded-full bg-amber-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">1</div>
+                  <p className="text-sm text-muted-foreground">Kartları eşleştirerek tüm çiftleri bul.</p>
+                </div>
+                <div className="flex gap-3">
+                  <div className="w-6 h-6 rounded-full bg-amber-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">2</div>
+                  <p className="text-sm text-muted-foreground text-rose-500 font-medium">Sadece <strong>3 hata yapma hakkın</strong> var, dikkatli ol!</p>
+                </div>
+                <div className="flex gap-3">
+                  <div className="w-6 h-6 rounded-full bg-amber-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">3</div>
+                  <p className="text-sm text-muted-foreground">Tüm çiftleri bulursan <strong>%10 indirim</strong> kazanırsın.</p>
+                </div>
+              </div>
+
+              <Button onClick={startGame} className="w-full rounded-full h-14 text-lg gap-2 bg-amber-600 hover:bg-amber-700">
+                <Play className="h-5 w-5 fill-current" /> Oyuna Başla
+              </Button>
             </div>
           </div>
         )}
