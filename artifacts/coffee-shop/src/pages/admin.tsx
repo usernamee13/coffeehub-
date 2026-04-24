@@ -159,7 +159,31 @@ export default function Admin() {
     setEditingPrice(null);
   };
 
+  // Ensure product exists in DB (upsert static products first)
+  const ensureInDb = async (product: ApiProduct) => {
+    const checkRes = await fetch(`${API_BASE}/products`, { headers: { "x-admin-key": adminKey } });
+    if (!checkRes.ok) return false;
+    const all: ApiProduct[] = await checkRes.json();
+    if (all.find((p) => p.id === product.id)) return true;
+    // Product not in DB – insert it first
+    const payload = {
+      id: product.id, name: product.name, description: product.description,
+      price: product.price, image: product.image, category: product.category,
+      tastingNotes: product.tastingNotes ?? [], ingredients: product.ingredients ?? [],
+      preparation: product.preparation ?? "",
+      ...(product.roastLevel ? { roastLevel: product.roastLevel } : {}),
+      ...(product.origin ? { origin: product.origin } : {}),
+    };
+    const insertRes = await fetch(`${API_BASE}/products`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-admin-key": adminKey },
+      body: JSON.stringify(payload),
+    });
+    return insertRes.ok || insertRes.status === 409; // 409 = already exists, that's fine
+  };
+
   const toggleAvailability = async (product: ApiProduct) => {
+    await ensureInDb(product);
     const body: any = { available: !product.available };
     if (!product.available) body.availableUntil = null;
     const res = await fetch(`${API_BASE}/products/${product.id}/availability`, {
@@ -175,6 +199,8 @@ export default function Admin() {
 
   const setUntilDate = async (id: string, dateStr: string) => {
     if (!dateStr) return;
+    const product = products.find((p) => p.id === id);
+    if (product) await ensureInDb(product);
     const until = new Date(dateStr);
     until.setHours(23, 59, 59, 999);
     const res = await fetch(`${API_BASE}/products/${id}/availability`, {
@@ -191,6 +217,8 @@ export default function Admin() {
 
   const deleteProduct = async (id: string, name: string) => {
     if (!confirm(`"${name}" ürününü kalıcı olarak silmek istiyor musunuz?`)) return;
+    const product = products.find((p) => p.id === id);
+    if (product) await ensureInDb(product);
     const res = await fetch(`${API_BASE}/products/${id}`, {
       method: "DELETE",
       headers: { "x-admin-key": adminKey },
