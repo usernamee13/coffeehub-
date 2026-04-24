@@ -39,7 +39,7 @@ function slugify(text: string) {
     .replace(/^-|-$/g, "");
 }
 
-const ADMIN_KEY_STORAGE = "coffeehub-admin-key";
+const ADMIN_KEY_STORAGE = "coffeehub-admin-session";
 const BASE = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/+$/, "") : "";
 const API_BASE = `${BASE}/api`;
 
@@ -69,9 +69,10 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function Admin() {
-  const [adminKey, setAdminKey] = useState(() => localStorage.getItem(ADMIN_KEY_STORAGE) || "");
+  const [adminKey, setAdminKey] = useState("");
   const [inputKey, setInputKey] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showPass, setShowPass] = useState(false);
   const [tab, setTab] = useState<"orders" | "products" | "stats">("orders");
 
   // ── Orders state ────────────────────────────────────────
@@ -92,24 +93,22 @@ export default function Admin() {
   });
   const [addError, setAddError] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputKey.trim()) return;
-    localStorage.setItem(ADMIN_KEY_STORAGE, inputKey.trim());
-    setAdminKey(inputKey.trim());
-    setIsAuthenticated(true);
-  };
-
-  // Fetch orders
-  const fetchOrders = async (key: string) => {
     setOrdersLoading(true);
     setOrdersError("");
     try {
-      const res = await fetch(`${API_BASE}/orders`, { headers: { "x-admin-key": key } });
-      if (res.status === 401) { setOrdersError("Yanlış şifre."); setIsAuthenticated(false); return; }
-      setOrders(await res.json());
+      const res = await fetch(`${API_BASE}/orders`, { headers: { "x-admin-key": inputKey.trim() } });
+      if (res.status === 401) { setOrdersError("Yanlış şifre."); setOrdersLoading(false); return; }
+      const data = await res.json();
+      setOrders(data);
+      setAdminKey(inputKey.trim());
+      sessionStorage.setItem(ADMIN_KEY_STORAGE, inputKey.trim());
+      setIsAuthenticated(true);
+      fetchProducts(inputKey.trim());
     } catch { setOrdersError("Sunucuya bağlanılamadı."); }
-    finally { setOrdersLoading(false); }
+    setOrdersLoading(false);
   };
 
   // Fetch products (admin sees all); falls back to static list if API is unavailable
@@ -127,13 +126,17 @@ export default function Admin() {
     }
   };
 
+  // Restore session if page is refreshed within same browser session
   useEffect(() => {
-    if (adminKey) {
-      setIsAuthenticated(true);
-      fetchOrders(adminKey);
-      fetchProducts(adminKey);
-    }
-  }, [adminKey]);
+    const sessionKey = sessionStorage.getItem(ADMIN_KEY_STORAGE);
+    if (!sessionKey) return;
+    setOrdersLoading(true);
+    fetch(`${API_BASE}/orders`, { headers: { "x-admin-key": sessionKey } })
+      .then((res) => { if (!res.ok) { sessionStorage.removeItem(ADMIN_KEY_STORAGE); return null; } return res.json(); })
+      .then((data) => { if (data) { setOrders(data); setAdminKey(sessionKey); setIsAuthenticated(true); fetchProducts(sessionKey); } })
+      .catch(() => {})
+      .finally(() => setOrdersLoading(false));
+  }, []);
 
   const updateOrderStatus = async (id: number, status: string) => {
     await fetch(`${API_BASE}/orders/${id}/status`, {
@@ -276,21 +279,33 @@ export default function Admin() {
             <h2 className="font-semibold text-lg mb-1">Giriş Yap</h2>
             <p className="text-sm text-muted-foreground mb-6">Admin paneline erişmek için şifrenizi girin.</p>
             <form onSubmit={handleLogin} className="space-y-4">
-              <div>
+              <div className="relative">
                 <Label htmlFor="admin-pass">Şifre</Label>
-                <Input
-                  id="admin-pass"
-                  type="password"
-                  autoComplete="off"
-                  value={inputKey}
-                  onChange={(e) => setInputKey(e.target.value)}
-                  className="mt-1 h-12 rounded-xl"
-                  placeholder="Admin şifresi"
-                  required
-                />
+                <div className="relative mt-1">
+                  <Input
+                    id="admin-pass"
+                    type={showPass ? "text" : "password"}
+                    autoComplete="off"
+                    value={inputKey}
+                    onChange={(e) => setInputKey(e.target.value)}
+                    className="h-12 rounded-xl pr-20"
+                    placeholder="Admin şifresi"
+                    required
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPass(!showPass)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-xs transition-colors"
+                  >
+                    {showPass ? "Gizle" : "Göster"}
+                  </button>
+                </div>
               </div>
               {ordersError && <p className="text-sm text-destructive">{ordersError}</p>}
-              <Button type="submit" className="w-full h-12 rounded-xl">Giriş Yap</Button>
+              <Button type="submit" disabled={ordersLoading} className="w-full h-12 rounded-xl">
+                {ordersLoading ? "Kontrol ediliyor..." : "Giriş Yap"}
+              </Button>
             </form>
           </div>
         </div>
@@ -309,7 +324,7 @@ export default function Admin() {
         </div>
         <button
           className="text-sm text-muted-foreground hover:text-foreground"
-          onClick={() => { localStorage.removeItem(ADMIN_KEY_STORAGE); setIsAuthenticated(false); setAdminKey(""); setInputKey(""); }}
+          onClick={() => { sessionStorage.removeItem(ADMIN_KEY_STORAGE); setIsAuthenticated(false); setAdminKey(""); setInputKey(""); }}
         >
           Çıkış
         </button>
