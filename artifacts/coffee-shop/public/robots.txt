@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin_gizli
+Disallow: /checkout
+Disallow: /order-history
+
+Sitemap: https://coffeehub-coffee-shop.vercel.app/sitemap.xml
