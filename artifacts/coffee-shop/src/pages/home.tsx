@@ -104,6 +104,35 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Game CTA */}
+      <section className="container max-w-6xl mx-auto px-6">
+        <Link href="/game" className="block group">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-800 to-stone-900 p-8 md:p-12 text-white hover:shadow-2xl transition-all duration-500">
+            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_30%_50%,_white_1px,_transparent_1px)] bg-[length:24px_24px]" />
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-amber-300 text-xs font-semibold uppercase tracking-wider">🎮 Mini Oyun</span>
+                </div>
+                <h2 className="font-serif text-2xl md:text-3xl font-bold mb-2">Hafıza Oyunu Oyna, İndirim Kazan!</h2>
+                <p className="text-white/70 text-sm md:text-base max-w-md">
+                  Kahve temalı kartları eşleştir, tüm çiftleri bul ve seçili bir ürünümüzde <strong className="text-amber-300">%10 indirim</strong> kazan.
+                </p>
+              </div>
+              <div className="flex-shrink-0 hidden md:block">
+                <div className="w-24 h-24 grid grid-cols-3 gap-1 group-hover:scale-110 transition-transform duration-300">
+                  {["☕","🫘","🍵","🧋","🍫","🥐","☕","🫘","🍵"].map((e, i) => (
+                    <div key={i} className="bg-white/10 rounded-lg flex items-center justify-center text-lg aspect-square">
+                      {i % 2 === 0 ? e : "?"}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </Link>
+      </section>
+
       {/* Story Section */}
       <section className="container max-w-6xl mx-auto px-6">
         <div className="bg-primary/5 rounded-3xl p-8 md:p-16 flex flex-col md:flex-row items-center gap-12">
