@@ -11,6 +11,7 @@ import Cart from "@/pages/cart";
 import Checkout from "@/pages/checkout";
 import OrderHistory from "@/pages/order-history";
 import Admin from "@/pages/admin";
+import AdminGizli from "@/pages/admin-gizli";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -19,6 +20,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/admin" component={Admin} />
+      <Route path="/admin_gizli" component={AdminGizli} />
       <Route>
         <Layout>
           <Switch>
