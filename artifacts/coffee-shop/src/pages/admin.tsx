@@ -72,7 +72,7 @@ export default function Admin() {
   const [adminKey, setAdminKey] = useState(() => localStorage.getItem(ADMIN_KEY_STORAGE) || "");
   const [inputKey, setInputKey] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [tab, setTab] = useState<"orders" | "products">("orders");
+  const [tab, setTab] = useState<"orders" | "products" | "stats">("orders");
 
   // ── Orders state ────────────────────────────────────────
   const [orders, setOrders] = useState<Order[]>([]);
@@ -307,13 +307,13 @@ export default function Admin() {
 
         {/* Tabs */}
         <div className="flex gap-1 bg-muted p-1 rounded-xl w-fit">
-          {(["orders", "products"] as const).map((t) => (
+          {(["orders", "products", "stats"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
               className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${tab === t ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
             >
-              {t === "orders" ? "Siparişler" : "Ürünler"}
+              {t === "orders" ? "Siparişler" : t === "products" ? "Ürünler" : "İstatistikler"}
             </button>
           ))}
         </div>
@@ -536,6 +536,57 @@ export default function Admin() {
                 </div>
               );
             })}
+          </div>
+        )}
+        {/* Stats Tab */}
+        {tab === "stats" && (
+          <div className="space-y-4">
+            <h3 className="font-serif font-bold text-lg mb-4">Ürün Bazlı Satış Raporu</h3>
+            <div className="bg-card rounded-2xl border border-border overflow-hidden">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-muted/50 text-muted-foreground text-xs uppercase">
+                  <tr>
+                    <th className="px-6 py-4 font-medium">Ürün Adı</th>
+                    <th className="px-6 py-4 font-medium text-center">Satılan Adet</th>
+                    <th className="px-6 py-4 font-medium text-right">Elde Edilen Ciro</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {(() => {
+                    const stats = orders
+                      .filter((o) => o.status === "Teslim Edildi")
+                      .reduce((acc, order) => {
+                        order.items.forEach((item) => {
+                          if (!acc[item.id]) acc[item.id] = { name: item.name, quantity: 0, revenue: 0 };
+                          acc[item.id].quantity += item.quantity;
+                          acc[item.id].revenue += item.quantity * item.price;
+                        });
+                        return acc;
+                      }, {} as Record<string, { name: string; quantity: number; revenue: number }>);
+                    
+                    const sorted = Object.values(stats).sort((a, b) => b.quantity - a.quantity);
+                    
+                    if (sorted.length === 0) {
+                      return (
+                        <tr>
+                          <td colSpan={3} className="px-6 py-8 text-center text-muted-foreground">
+                            Henüz teslim edilmiş bir sipariş bulunmuyor.
+                          </td>
+                        </tr>
+                      );
+                    }
+                    
+                    return sorted.map((s, idx) => (
+                      <tr key={idx} className="hover:bg-muted/50 transition-colors">
+                        <td className="px-6 py-4 font-medium">{s.name}</td>
+                        <td className="px-6 py-4 text-center font-bold">{s.quantity}</td>
+                        <td className="px-6 py-4 text-right text-green-600 font-semibold">{formatCurrency(s.revenue)}</td>
+                      </tr>
+                    ));
+                  })()}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>
