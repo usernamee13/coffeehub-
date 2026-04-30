@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/format";
 import { products } from "@/lib/data";
 import { useCartStore } from "@/store/use-cart";
+import { getGameDiscount, DISCOUNT_KEY, type GameDiscount, canPlayGame, recordGamePlay, getRemainingTime } from "@/lib/game-logic";
 
 // 6 pairs of coffee-themed emojis (12 cards total, 3x4 grid)
 const CARD_EMOJIS = ["☕", "🫘", "🍵", "🧋", "🍫", "🥐"];
-import { getGameDiscount, DISCOUNT_KEY, type GameDiscount } from "@/lib/game-logic";
 
 interface Card {
   id: number;
@@ -17,7 +17,7 @@ interface Card {
   isMatched: boolean;
 }
 
-function shuffle<T>(arr: T[]): T[] {
+function shuffleArray<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -27,7 +27,7 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 function createCards(): Card[] {
-  return shuffle([...CARD_EMOJIS, ...CARD_EMOJIS]).map((emoji, i) => ({
+  return shuffleArray([...CARD_EMOJIS, ...CARD_EMOJIS]).map((emoji, i) => ({
     id: i,
     emoji,
     isFlipped: false,
@@ -122,6 +122,7 @@ export default function Game() {
             if (next <= 0) {
               setGameOver(true);
               setLocked(true);
+              recordGamePlay();
             }
             return next;
           });
@@ -152,6 +153,7 @@ export default function Game() {
       localStorage.setItem(DISCOUNT_KEY, JSON.stringify(d));
       setDiscount(d);
       refreshCart();
+      recordGamePlay();
     }
   }, [matchedCount, won, gameOver, refreshCart]);
 
@@ -247,9 +249,16 @@ export default function Game() {
 
         {/* Reset button */}
         <div className="flex justify-center mb-6">
-          <Button variant="outline" size="sm" onClick={resetGame} className="rounded-full gap-2">
-            <RotateCcw className="h-4 w-4" /> Yeniden Başla
-          </Button>
+          {canPlayGame() ? (
+            <Button variant="outline" size="sm" onClick={resetGame} className="rounded-full gap-2">
+              <RotateCcw className="h-4 w-4" /> Yeniden Başla
+            </Button>
+          ) : (
+            <div className="text-xs text-muted-foreground bg-stone-100/50 border border-stone-200 py-2 px-4 rounded-full flex items-center gap-2">
+              <RotateCcw className="h-3 w-3 opacity-50" />
+              Yeni oyun için {getRemainingTime()} kaldı
+            </div>
+          )}
         </div>
 
         {/* Win Modal */}
@@ -279,9 +288,15 @@ export default function Game() {
                 <Link href={`/coffee/${discount.productId}`}>
                   <Button className="w-full rounded-full">Ürünü Sepete Ekle</Button>
                 </Link>
-                <Button variant="outline" onClick={resetGame} className="w-full rounded-full gap-2">
-                  <RotateCcw className="h-4 w-4" /> Tekrar Oyna
-                </Button>
+                {canPlayGame() ? (
+                  <Button variant="outline" onClick={resetGame} className="w-full rounded-full gap-2">
+                    <RotateCcw className="h-4 w-4" /> Tekrar Oyna
+                  </Button>
+                ) : (
+                  <p className="text-xs text-muted-foreground mt-2 italic">
+                    Bir sonraki oyun hakkın 24 saat sonra açılacaktır.
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -300,9 +315,15 @@ export default function Game() {
               </p>
 
               <div className="flex flex-col gap-3">
-                <Button onClick={resetGame} className="w-full rounded-full gap-2 py-6 text-lg">
-                  <RotateCcw className="h-5 w-5" /> Yeniden Dene
-                </Button>
+                {canPlayGame() ? (
+                  <Button onClick={resetGame} className="w-full rounded-full gap-2 py-6 text-lg">
+                    <RotateCcw className="h-5 w-5" /> Yeniden Dene
+                  </Button>
+                ) : (
+                  <div className="bg-stone-100 rounded-2xl p-4 text-sm text-muted-foreground mb-2">
+                    Üzgünüz, bir sonraki oyun hakkın için <strong>{getRemainingTime()}</strong> beklemelisin.
+                  </div>
+                )}
                 <Link href="/">
                   <Button variant="ghost" className="w-full rounded-full text-muted-foreground">
                     Ana Sayfaya Dön
@@ -337,9 +358,21 @@ export default function Game() {
                 </div>
               </div>
 
-              <Button onClick={startGame} className="w-full rounded-full h-14 text-lg gap-2 bg-amber-600 hover:bg-amber-700">
-                <Play className="h-5 w-5 fill-current" /> Oyuna Başla
-              </Button>
+              {canPlayGame() ? (
+                <Button onClick={startGame} className="w-full rounded-full h-14 text-lg gap-2 bg-amber-600 hover:bg-amber-700">
+                  <Play className="h-5 w-5 fill-current" /> Oyuna Başla
+                </Button>
+              ) : (
+                <div className="space-y-4">
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-center">
+                    <p className="text-amber-800 text-sm font-medium">Günlük oyun hakkın doldu!</p>
+                    <p className="text-amber-600 text-xs mt-1">Yeni bir indirim kazanmak için <strong>{getRemainingTime()}</strong> sonra tekrar gelebilirsin.</p>
+                  </div>
+                  <Link href="/">
+                    <Button variant="outline" className="w-full rounded-full h-12">Ana Sayfaya Dön</Button>
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         )}

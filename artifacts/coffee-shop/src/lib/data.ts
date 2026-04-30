@@ -10,6 +10,7 @@ export interface Product {
   tastingNotes: string[];
   ingredients: string[];
   preparation: string;
+  available?: boolean;
 }
 
 export const products: Product[] = [
